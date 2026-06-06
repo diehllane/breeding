@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon USUM Breeding Compatibility</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #e3350d;
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        select, input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #e3350d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #c02800;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .egg-group {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .field { background-color: #e0f7fa; }
+        .monster { background-color: #e8f5e9; }
+        .water1 { background-color: #e1f5fe; }
+        .water2 { background-color: #e0f2f1; }
+        .water3 { background-color: #e0f7fa; }
+        .flying { background-color: #f1f8e9; }
+        .bug { background-color: #f3e5f5; }
+        .grass { background-color: #e8f5e9; }
+        .human-like { background-color: #fff8e1; }
+        .mineral { background-color: #f5f5f5; }
+        .amorphous { background-color: #f3e5f5; }
+        .ditto { background-color: #e0f7fa; }
+        .undiscovered { background-color: #efebe9; }
+        .dragon { background-color: #e8f5e9; }
+        .fairy { background-color: #fce4ec; }
+        .pokemon-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .pokemon {
+            background-color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            border: 1px solid #ddd;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pokémon USUM Breeding Compatibility</h1>
+
+        <div class="controls">
+            <input type="text" id="pokemonInput" placeholder="Start typing a Pokémon name...">
+            <select id="genderSelect">
+                <option value="any">Any Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="genderless">Genderless</option>
+            </select>
+            <button id="searchBtn">Search</button>
+        </div>
+
+        <div id="results" class="results"></div>
+    </div>
+
+    <script>
+        // Pokémon data (simplified for this example)
+        const pokemonData = {
+            "Pikachu": {
+                "eggGroups": ["Field", "Fairy"],
+                "gender": "both",
+                "canBreed": true
+            },
+            "Charizard": {
+                "eggGroups": ["Monster", "Dragon"],
+                "gender": "both",
+                "canBreed": true
+            },
+            "Gyarados": {
+                "eggGroups": ["Water 2", "Dragon"],
+                "gender": "both",
+                "canBreed": true
+            },
+            "Ditto": {
+                "eggGroups": ["Ditto"],
+                "gender": "genderless",
+                "canBreed": true
+            },
+            "Legendary Pokémon": {
+                "eggGroups": ["Undiscovered"],
+                "gender": "varies",
+                "canBreed": false
+            }
+            // In a real implementation, this would contain all 807 USUM Pokémon
+        };
+
+        // Egg group colors for styling
+        const eggGroupColors = {
+            "Field": "field",
+            "Monster": "monster",
+            "Water 1": "water1",
+            "Water 2": "water2",
+            "Water 3": "water3",
+            "Flying": "flying",
+            "Bug": "bug",
+            "Grass": "grass",
+            "Human-Like": "human-like",
+            "Mineral": "mineral",
+            "Amorphous": "amorphous",
+            "Ditto": "ditto",
+            "Undiscovered": "undiscovered",
+            "Dragon": "dragon",
+            "Fairy": "fairy"
+        };
+
+        // Initialize autocomplete
+        const pokemonInput = document.getElementById('pokemonInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsDiv = document.getElementById('results');
+
+        // In a real implementation, you would populate this from your data
+        const pokemonNames = Object.keys(pokemonData);
+
+        // Simple autocomplete
+        pokemonInput.addEventListener('input', function() {
+            const input = this.value.toLowerCase();
+            if (input.length === 0) return;
+
+            // In a real app, you'd filter the full list
+            const matches = pokemonNames.filter(name =>
+                name.toLowerCase().includes(input)
+            );
+
+            // For demo, just show first 5 matches
+            if (matches.length > 0) {
+                this.placeholder = matches.slice(0, 5).join(', ');
+            }
+        });
+
+        // Search function
+        searchBtn.addEventListener('click', function() {
+            const pokemonName = pokemonInput.value.trim();
+            const gender = document.getElementById('genderSelect').value;
+
+            if (!pokemonName) {
+                alert('Please enter a Pokémon name');
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div class="loading">Loading...</div>';
+
+            // Simulate API call with setTimeout
+            setTimeout(() => {
+                displayResults(pokemonName, gender);
+            }, 500);
+        });
+
+        function displayResults(pokemonName, gender) {
+            const pokemon = pokemonData[pokemonName];
+
+            if (!pokemon) {
+                resultsDiv.innerHTML = `<p>Pokémon not found. Please check the spelling.</p>`;
+                return;
+            }
+
+            if (!pokemon.canBreed) {
+                resultsDiv.innerHTML = `<p>${pokemonName} cannot breed (Undiscovered egg group).</p>`;
+                return;
+            }
+
+            // In a real implementation, you would:
+            // 1. Get all Pokémon that share at least one egg group
+            // 2. Filter by gender compatibility
+            // 3. Group by egg groups
+
+            // For this demo, we'll show a simplified version
+            const compatiblePokemon = getCompatiblePokemon(pokemon, gender);
+            const groupedByEggGroup = groupByEggGroup(compatiblePokemon);
+
+            let html = `<h2>Breeding Partners for ${pokemonName}</h2>`;
+
+            for (const [eggGroup, pokemonList] of Object.entries(groupedByEggGroup)) {
+                const colorClass = eggGroupColors[eggGroup] || 'field';
+                html += `
+                    <div class="egg-group ${colorClass}">
+                        <h3>${eggGroup} Egg Group</h3>
+                        <div class="pokemon-list">
+                            ${pokemonList.map(p => `<span class="pokemon">${p}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function getCompatiblePokemon(pokemon, gender) {
+            // This is a simplified version - in reality you'd:
+            // 1. Check all Pokémon that share egg groups
+            // 2. Apply gender rules (e.g., male can breed with female or Ditto)
+            // 3. Handle special cases (Nidorina/Nidoqueen, etc.)
+
+            const allPokemon = Object.keys(pokemonData);
+            const compatible = [];
+
+            // For demo, just return some example Pokémon
+            if (pokemon.eggGroups.includes("Field")) {
+                compatible.push("Pikachu", "Eevee", "Skitty");
+            }
+            if (pokemon.eggGroups.includes("Fairy")) {
+                compatible.push("Jigglypuff", "Clefairy", "Snorlax");
+            }
+            if (pokemon.eggGroups.includes("Monster")) {
+                compatible.push("Charizard", "Bulbasaur", "Squirtle");
+            }
+
+            // Always include Ditto
+            compatible.push("Ditto");
+
+            return compatible;
+        }
+
+        function groupByEggGroup(pokemonList) {
+            // In reality, you'd group by the egg groups they share with the selected Pokémon
+            // This is simplified for the demo
+
+            const groups = {
+                "Field": [],
+                "Fairy": [],
+                "Monster": [],
+                "Ditto": ["Ditto"]
+            };
+
+            pokemonList.forEach(p => {
+                const pokemon = pokemonData[p];
+                if (!pokemon) return;
+
+                if (p === "Ditto") {
+                    groups["Ditto"].push(p);
+                } else if (pokemon.eggGroups.includes("Field")) {
+                    groups["Field"].push(p);
+                } else if (pokemon.eggGroups.includes("Fairy")) {
+                    groups["Fairy"].push(p);
+                } else if (pokemon.eggGroups.includes("Monster")) {
+                    groups["Monster"].push(p);
+                }
+            });
+
+            // Remove empty groups
+            Object.keys(groups).forEach(key => {
+                if (groups[key].length === 0) {
+                    delete groups[key];
+                }
+            });
+
+            return groups;
+        }
+    </script>
+</body>
+</html>
