@@ -1,299 +1,1102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon USUM Breeding Compatibility</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #e3350d;
-            text-align: center;
-        }
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        select, input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            flex-grow: 1;
-        }
-        button {
-            padding: 8px 16px;
-            background-color: #e3350d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #c02800;
-        }
-        .results {
-            margin-top: 20px;
-        }
-        .egg-group {
-            margin-bottom: 20px;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .field { background-color: #e0f7fa; }
-        .monster { background-color: #e8f5e9; }
-        .water1 { background-color: #e1f5fe; }
-        .water2 { background-color: #e0f2f1; }
-        .water3 { background-color: #e0f7fa; }
-        .flying { background-color: #f1f8e9; }
-        .bug { background-color: #f3e5f5; }
-        .grass { background-color: #e8f5e9; }
-        .human-like { background-color: #fff8e1; }
-        .mineral { background-color: #f5f5f5; }
-        .amorphous { background-color: #f3e5f5; }
-        .ditto { background-color: #e0f7fa; }
-        .undiscovered { background-color: #efebe9; }
-        .dragon { background-color: #e8f5e9; }
-        .fairy { background-color: #fce4ec; }
-        .pokemon-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-        .pokemon {
-            background-color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            border: 1px solid #ddd;
-        }
-        .loading {
-            text-align: center;
-            padding: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokémon Breeding Chart — USUM Gen 7</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue:        #2855ae;
+      --blue-dark:   #1a3a7a;
+      --blue-light:  #5b80d4;
+      --yellow:      #f7c948;
+      --yellow-dark: #d4a016;
+      --red:         #cc2222;
+      --white:       #f8f8f8;
+      --offwhite:    #eef1f9;
+      --gray:        #6b7280;
+      --text:        #1a1a2e;
+      --card-bg:     #ffffff;
+      --shadow:      rgba(40,85,174,0.18);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--blue-dark);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Pokéball animated background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 60% 10%, rgba(204,34,34,0.25) 0%, transparent 55%),
+        radial-gradient(circle at 10% 80%, rgba(88,128,212,0.25) 0%, transparent 55%),
+        linear-gradient(160deg, #1a3a7a 0%, #0d1f4a 60%, #0a1530 100%);
+      z-index: 0;
+    }
+
+    /* Floating pokeball watermarks */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      border: 60px solid rgba(255,255,255,0.03);
+      top: -150px; right: -150px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 32px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-img {
+      height: 70px;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+      animation: logoFloat 3s ease-in-out infinite;
+    }
+    @keyframes logoFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+
+    header h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(9px, 2.2vw, 14px);
+      color: var(--yellow);
+      text-shadow: 2px 2px 0 var(--yellow-dark), 0 0 20px rgba(247,201,72,0.4);
+      letter-spacing: 1px;
+      line-height: 1.7;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* ── PROFESSOR OAK ── */
+    .oak-container {
+      position: fixed;
+      bottom: 0; right: 20px;
+      width: 180px;
+      z-index: 5;
+      pointer-events: none;
+      filter: drop-shadow(-6px 0 20px rgba(0,0,0,0.5));
+      animation: oakIdle 4s ease-in-out infinite;
+    }
+    .oak-container img { width: 100%; display: block; }
+    @keyframes oakIdle {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+
+    /* ── PIKACHU ── */
+    .pika-container {
+      position: fixed;
+      bottom: 0; left: 20px;
+      width: 140px;
+      z-index: 5;
+      pointer-events: none;
+      filter: drop-shadow(6px 0 20px rgba(0,0,0,0.5));
+      animation: pikaIdle 3.5s ease-in-out infinite 0.5s;
+    }
+    .pika-container img { width: 100%; display: block; }
+    @keyframes pikaIdle {
+      0%,100% { transform: translateY(0) scaleX(-1); }
+      50%      { transform: translateY(-10px) scaleX(-1); }
+    }
+
+    /* ── MAIN CARD ── */
+    main {
+      position: relative;
+      z-index: 10;
+      max-width: 820px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: 0 8px 40px var(--shadow), 0 2px 0 var(--yellow) inset;
+      padding: 28px;
+      border: 2px solid rgba(255,255,255,0.9);
+    }
+
+    /* ── LOADER ── */
+    #loader {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--blue);
+    }
+    .loader-ball {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom, var(--red) 50%, white 50%);
+      border: 4px solid #222;
+      margin: 0 auto 20px;
+      animation: spin 0.9s linear infinite;
+      position: relative;
+    }
+    .loader-ball::after {
+      content: '';
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%,-50%);
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: white;
+      border: 4px solid #222;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #loader p {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: var(--blue);
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── SEARCH SECTION ── */
+    .search-section { display: none; }
+    .search-section.visible { display: block; }
+
+    .search-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: var(--blue-dark);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .input-wrap {
+      flex: 1;
+      min-width: 220px;
+      position: relative;
+    }
+
+    #pokemon-input {
+      width: 100%;
+      padding: 14px 44px 14px 16px;
+      font-size: 15px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      border: 3px solid var(--blue-light);
+      border-radius: 12px;
+      outline: none;
+      color: var(--text);
+      background: var(--offwhite);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #pokemon-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(40,85,174,0.15);
+    }
+
+    .sprite-preview {
+      position: absolute;
+      right: 8px; top: 50%;
+      transform: translateY(-50%);
+      width: 36px; height: 36px;
+      object-fit: contain;
+    }
+
+    .autocomplete-list {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: white;
+      border: 2px solid var(--blue-light);
+      border-radius: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      display: none;
+    }
+    .autocomplete-list.open { display: block; }
+    .autocomplete-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.12s;
+    }
+    .autocomplete-item:hover, .autocomplete-item.active {
+      background: var(--offwhite);
+    }
+    .autocomplete-item img {
+      width: 30px; height: 30px;
+      object-fit: contain;
+    }
+    .autocomplete-item .dex-num {
+      font-size: 11px;
+      color: var(--gray);
+      font-weight: 600;
+      margin-left: auto;
+    }
+
+    /* ── GENDER SELECT ── */
+    .gender-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .gender-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .gender-btn {
+      padding: 12px 18px;
+      border: 3px solid var(--blue-light);
+      border-radius: 10px;
+      background: var(--offwhite);
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      color: var(--blue-dark);
+      transition: all 0.15s;
+    }
+    .gender-btn:hover { background: #dce6ff; }
+    .gender-btn.selected {
+      background: var(--blue);
+      border-color: var(--blue-dark);
+      color: white;
+    }
+    .gender-btn.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* ── TYPE BADGE ── */
+    .type-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 800;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .type-Normal    { background: #a8a878; }
+    .type-Fire      { background: #f08030; }
+    .type-Water     { background: #6890f0; }
+    .type-Electric  { background: #f8d030; color: #333; }
+    .type-Grass     { background: #78c850; }
+    .type-Ice       { background: #98d8d8; color: #333; }
+    .type-Fighting  { background: #c03028; }
+    .type-Poison    { background: #a040a0; }
+    .type-Ground    { background: #e0c068; color: #333; }
+    .type-Flying    { background: #a890f0; }
+    .type-Psychic   { background: #f85888; }
+    .type-Bug       { background: #a8b820; }
+    .type-Rock      { background: #b8a038; }
+    .type-Ghost     { background: #705898; }
+    .type-Dragon    { background: #7038f8; }
+    .type-Dark      { background: #705848; }
+    .type-Steel     { background: #b8b8d0; color: #333; }
+    .type-Fairy     { background: #ee99ac; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 2px dashed #d0d8ee;
+      margin: 24px 0;
+    }
+
+    /* ── RESULTS ── */
+    #results { display: none; }
+    #results.visible { display: block; }
+
+    .selected-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+      border-radius: 14px;
+      color: white;
+    }
+    .selected-sprite {
+      width: 72px; height: 72px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+    }
+    .selected-name {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    .selected-meta {
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+      font-weight: 600;
+      margin-top: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* Cannot breed */
+    .cannot-breed {
+      text-align: center;
+      padding: 32px 20px;
+      background: linear-gradient(135deg, #fff0f0 0%, #fdd9d9 100%);
+      border-radius: 14px;
+      border: 2px solid #f5c0c0;
+    }
+    .cannot-breed .icon { font-size: 40px; margin-bottom: 12px; }
+    .cannot-breed h3 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+    .cannot-breed p {
+      font-size: 13px;
+      color: #a04040;
+    }
+
+    /* Egg group sections */
+    .egg-group-section {
+      margin-bottom: 24px;
+    }
+
+    .egg-group-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: white;
+    }
+
+    .egg-group-icon { font-size: 18px; }
+    .pokemon-count {
+      margin-left: auto;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      background: rgba(255,255,255,0.25);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    /* Egg group colors */
+    .egg-Monster    { background: linear-gradient(135deg, #7038c8, #5020a0); }
+    .egg-Water1     { background: linear-gradient(135deg, #4080e0, #2050b8); }
+    .egg-Bug        { background: linear-gradient(135deg, #80a020, #608010); }
+    .egg-Flying     { background: linear-gradient(135deg, #8080d0, #6060b0); }
+    .egg-Field      { background: linear-gradient(135deg, #d08030, #a06010); }
+    .egg-Fairy      { background: linear-gradient(135deg, #d860a8, #b04088); }
+    .egg-Grass      { background: linear-gradient(135deg, #50b850, #30903a); }
+    .egg-HumanLike  { background: linear-gradient(135deg, #f05050, #c03030); }
+    .egg-Mineral    { background: linear-gradient(135deg, #9090a0, #606070); }
+    .egg-Amorphous  { background: linear-gradient(135deg, #8840c0, #602090); }
+    .egg-Water2     { background: linear-gradient(135deg, #2090d8, #1060a0); }
+    .egg-Water3     { background: linear-gradient(135deg, #30b0c0, #108090); }
+    .egg-Dragon     { background: linear-gradient(135deg, #6028e8, #4010b0); }
+    .egg-Ditto      { background: linear-gradient(135deg, #c06090, #903060); }
+
+    /* Pokemon grid */
+    .pokemon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+
+    .pokemon-card {
+      background: var(--offwhite);
+      border: 2px solid #d8e0f0;
+      border-radius: 12px;
+      padding: 10px 8px 8px;
+      text-align: center;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      cursor: default;
+    }
+    .pokemon-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(40,85,174,0.2);
+      border-color: var(--blue-light);
+    }
+    .pokemon-card img {
+      width: 60px; height: 60px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+    .pokemon-card .pname {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.3;
+      margin-top: 4px;
+      display: block;
+    }
+    .pokemon-card .pdex {
+      font-size: 10px;
+      color: var(--gray);
+      font-weight: 600;
+    }
+    .pokemon-card .ptypes {
+      margin-top: 4px;
+      display: flex;
+      gap: 3px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Ditto section */
+    .ditto-section {
+      margin-top: 28px;
+      padding: 16px 18px;
+      background: linear-gradient(135deg, #fff5fc 0%, #fde8f8 100%);
+      border: 2px dashed #d090c0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .ditto-section img {
+      width: 64px; height: 64px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+    .ditto-section h4 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: #903060;
+      margin-bottom: 6px;
+    }
+    .ditto-section p {
+      font-size: 12px;
+      color: #604050;
+      font-weight: 600;
+    }
+
+    /* Error */
+    .error-box {
+      background: #fff5f5;
+      border: 2px solid #fca5a5;
+      border-radius: 10px;
+      padding: 16px;
+      color: #dc2626;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    /* Loading spinner in results */
+    .results-loading {
+      text-align: center;
+      padding: 40px;
+    }
+    .results-loading .loader-ball {
+      width: 40px; height: 40px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 20px;
+      color: rgba(255,255,255,0.4);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* responsive */
+    @media (max-width: 600px) {
+      .oak-container { width: 110px; right: 5px; }
+      .pika-container { width: 90px; left: 5px; }
+      .pokemon-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Pokémon USUM Breeding Compatibility</h1>
 
-        <div class="controls">
-            <input type="text" id="pokemonInput" placeholder="Start typing a Pokémon name...">
-            <select id="genderSelect">
-                <option value="any">Any Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="genderless">Genderless</option>
-            </select>
-            <button id="searchBtn">Search</button>
+  <!-- Professor Oak -->
+  <div class="oak-container">
+    <img src="Pokemon-11.png" alt="Professor Oak" />
+  </div>
+
+  <!-- Pikachu -->
+  <div class="pika-container">
+    <img src="Whisk_1b5221c4ebf0404bd46447faa0660c91dr-gigapixel.png" alt="Pikachu" />
+  </div>
+
+  <header>
+    <img src="Pokemon-14.png" alt="Pokémon" class="logo-img" />
+    <h1>Breeding Compatibility Chart</h1>
+    <span class="subtitle">Ultra Sun &amp; Ultra Moon · Generation VII</span>
+  </header>
+
+  <main>
+    <div class="card">
+
+      <!-- Loader -->
+      <div id="loader">
+        <div class="loader-ball"></div>
+        <p>Loading Pokédex data...</p>
+      </div>
+
+      <!-- Search Section -->
+      <div class="search-section" id="search-section">
+        <label class="search-label" for="pokemon-input">Choose a Pokémon</label>
+        <div class="search-row">
+          <div class="input-wrap">
+            <input type="text" id="pokemon-input" placeholder="Start typing a name…" autocomplete="off" />
+            <img src="" alt="" class="sprite-preview" id="sprite-preview" style="display:none;" />
+            <div class="autocomplete-list" id="autocomplete-list"></div>
+          </div>
+
+          <div class="gender-group">
+            <label class="search-label">Gender</label>
+            <div class="gender-btns" id="gender-btns">
+              <button class="gender-btn" data-gender="male">♂ Male</button>
+              <button class="gender-btn" data-gender="female">♀ Female</button>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div id="results" class="results"></div>
+      <hr class="divider" id="results-divider" style="display:none;" />
+
+      <!-- Results -->
+      <div id="results"></div>
+
     </div>
+  </main>
 
-    <script>
-        // Pokémon data (simplified for this example)
-        const pokemonData = {
-            "Pikachu": {
-                "eggGroups": ["Field", "Fairy"],
-                "gender": "both",
-                "canBreed": true
-            },
-            "Charizard": {
-                "eggGroups": ["Monster", "Dragon"],
-                "gender": "both",
-                "canBreed": true
-            },
-            "Gyarados": {
-                "eggGroups": ["Water 2", "Dragon"],
-                "gender": "both",
-                "canBreed": true
-            },
-            "Ditto": {
-                "eggGroups": ["Ditto"],
-                "gender": "genderless",
-                "canBreed": true
-            },
-            "Legendary Pokémon": {
-                "eggGroups": ["Undiscovered"],
-                "gender": "varies",
-                "canBreed": false
-            }
-            // In a real implementation, this would contain all 807 USUM Pokémon
-        };
+  <footer>
+    Data sourced from PokéAPI · Pokémon © Nintendo/Game Freak · Fan tool for USUM Gen VII
+  </footer>
 
-        // Egg group colors for styling
-        const eggGroupColors = {
-            "Field": "field",
-            "Monster": "monster",
-            "Water 1": "water1",
-            "Water 2": "water2",
-            "Water 3": "water3",
-            "Flying": "flying",
-            "Bug": "bug",
-            "Grass": "grass",
-            "Human-Like": "human-like",
-            "Mineral": "mineral",
-            "Amorphous": "amorphous",
-            "Ditto": "ditto",
-            "Undiscovered": "undiscovered",
-            "Dragon": "dragon",
-            "Fairy": "fairy"
-        };
+<script>
+// ─────────────────────────────────────────────
+//  DATA & STATE
+// ─────────────────────────────────────────────
+const EGG_GROUPS = [
+  'monster','water1','bug','flying','field','fairy',
+  'grass','human-like','mineral','amorphous',
+  'water2','water3','dragon','ditto','no-eggs'
+];
 
-        // Initialize autocomplete
-        const pokemonInput = document.getElementById('pokemonInput');
-        const searchBtn = document.getElementById('searchBtn');
-        const resultsDiv = document.getElementById('results');
+const EGG_GROUP_DISPLAY = {
+  'monster':    { name: 'Monster',    icon: '🦕', cls: 'egg-Monster'    },
+  'water1':     { name: 'Water 1',    icon: '🐸', cls: 'egg-Water1'     },
+  'bug':        { name: 'Bug',        icon: '🐛', cls: 'egg-Bug'        },
+  'flying':     { name: 'Flying',     icon: '🦅', cls: 'egg-Flying'     },
+  'field':      { name: 'Field',      icon: '🦊', cls: 'egg-Field'      },
+  'fairy':      { name: 'Fairy',      icon: '🧚', cls: 'egg-Fairy'      },
+  'grass':      { name: 'Grass',      icon: '🌿', cls: 'egg-Grass'      },
+  'human-like': { name: 'Human-Like', icon: '🥊', cls: 'egg-HumanLike'  },
+  'mineral':    { name: 'Mineral',    icon: '⚙️', cls: 'egg-Mineral'    },
+  'amorphous':  { name: 'Amorphous',  icon: '👻', cls: 'egg-Amorphous'  },
+  'water2':     { name: 'Water 2',    icon: '🐟', cls: 'egg-Water2'     },
+  'water3':     { name: 'Water 3',    icon: '🦀', cls: 'egg-Water3'     },
+  'dragon':     { name: 'Dragon',     icon: '🐉', cls: 'egg-Dragon'     },
+  'ditto':      { name: 'Ditto',      icon: '🔮', cls: 'egg-Ditto'      },
+  'no-eggs':    { name: 'Undiscovered', icon: '🚫', cls: 'egg-Ditto'   },
+};
 
-        // In a real implementation, you would populate this from your data
-        const pokemonNames = Object.keys(pokemonData);
+// Gen 7 USUM national dex: #1-807
+const MAX_DEX = 807;
 
-        // Simple autocomplete
-        pokemonInput.addEventListener('input', function() {
-            const input = this.value.toLowerCase();
-            if (input.length === 0) return;
+// species data: id -> { name, eggGroups[], genderRate, types[] }
+let speciesDB = {};       // key = species id (number)
+let pokemonList = [];     // [{id, name, displayName}] sorted by id
+let eggGroupMap = {};     // eggGroup -> Set of species ids
 
-            // In a real app, you'd filter the full list
-            const matches = pokemonNames.filter(name =>
-                name.toLowerCase().includes(input)
+let selectedId   = null;
+let selectedGender = null;
+
+// ─────────────────────────────────────────────
+//  LOAD DATA
+// ─────────────────────────────────────────────
+async function loadAllData() {
+  // Step 1: fetch all egg groups (parallel)
+  const eggGroupFetches = EGG_GROUPS.map(g =>
+    fetch(`https://pokeapi.co/api/v2/egg-group/${g}/`)
+      .then(r => r.json())
+      .then(data => ({ key: g, data }))
+      .catch(() => ({ key: g, data: null }))
+  );
+
+  // Step 2: get all species list to resolve names (#1-807)
+  const speciesListFetch = fetch('https://pokeapi.co/api/v2/pokemon-species?limit=807&offset=0')
+    .then(r => r.json());
+
+  const [egResults, speciesList] = await Promise.all([
+    Promise.all(eggGroupFetches),
+    speciesListFetch
+  ]);
+
+  // Build eggGroupMap: eggGroup -> Set<speciesId>
+  for (const { key, data } of egResults) {
+    if (!data) continue;
+    const set = new Set();
+    for (const sp of data.pokemon_species) {
+      const id = parseInt(sp.url.split('/').filter(Boolean).pop());
+      if (id >= 1 && id <= MAX_DEX) set.add(id);
+    }
+    eggGroupMap[key] = set;
+  }
+
+  // Build pokemonList from species list
+  // speciesList.results has {name, url}
+  // We need gender_rate and types per species — batch fetch
+  // To keep initial load fast, we only fetch species details on demand (per selection)
+  // But we need at minimum: name + id + egg groups (already have from eggGroupMap)
+  // Build base list
+  pokemonList = [];
+  for (const sp of speciesList.results) {
+    const id = parseInt(sp.url.split('/').filter(Boolean).pop());
+    if (id < 1 || id > MAX_DEX) continue;
+    const display = toDisplayName(sp.name);
+    pokemonList.push({ id, name: sp.name, displayName: display });
+    speciesDB[id] = { name: sp.name, displayName: display, eggGroups: null, genderRate: null, types: [] };
+  }
+  // Assign egg groups from eggGroupMap
+  for (const [grp, set] of Object.entries(eggGroupMap)) {
+    for (const id of set) {
+      if (speciesDB[id]) {
+        if (!speciesDB[id].eggGroups) speciesDB[id].eggGroups = [];
+        speciesDB[id].eggGroups.push(grp);
+      }
+    }
+  }
+
+  // Sort by id
+  pokemonList.sort((a,b) => a.id - b.id);
+
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('search-section').classList.add('visible');
+  initSearch();
+}
+
+function toDisplayName(name) {
+  return name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+// ─────────────────────────────────────────────
+//  SEARCH / AUTOCOMPLETE
+// ─────────────────────────────────────────────
+function initSearch() {
+  const input = document.getElementById('pokemon-input');
+  const list  = document.getElementById('autocomplete-list');
+  let activeIdx = -1;
+
+  function getSuggestions(val) {
+    const v = val.toLowerCase().trim();
+    if (!v) return [];
+    return pokemonList
+      .filter(p => p.name.includes(v) || p.displayName.toLowerCase().includes(v))
+      .slice(0, 10);
+  }
+
+  function renderSuggestions(items) {
+    list.innerHTML = '';
+    activeIdx = -1;
+    if (!items.length) { list.classList.remove('open'); return; }
+    items.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'autocomplete-item';
+      div.innerHTML = `
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.id}.png"
+             alt="${item.displayName}" onerror="this.style.display='none'" />
+        <span>${item.displayName}</span>
+        <span class="dex-num">#${String(item.id).padStart(3,'0')}</span>
+      `;
+      div.addEventListener('mousedown', () => selectPokemon(item));
+      list.appendChild(div);
+    });
+    list.classList.add('open');
+  }
+
+  input.addEventListener('input', () => {
+    renderSuggestions(getSuggestions(input.value));
+  });
+
+  input.addEventListener('keydown', e => {
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (e.key === 'ArrowDown') {
+      activeIdx = Math.min(activeIdx + 1, items.length - 1);
+      items.forEach((el,i) => el.classList.toggle('active', i === activeIdx));
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      activeIdx = Math.max(activeIdx - 1, 0);
+      items.forEach((el,i) => el.classList.toggle('active', i === activeIdx));
+      e.preventDefault();
+    } else if (e.key === 'Enter') {
+      if (activeIdx >= 0) items[activeIdx].dispatchEvent(new MouseEvent('mousedown'));
+      e.preventDefault();
+    } else if (e.key === 'Escape') {
+      list.classList.remove('open');
+    }
+  });
+
+  input.addEventListener('blur', () => {
+    setTimeout(() => list.classList.remove('open'), 150);
+  });
+  input.addEventListener('focus', () => {
+    if (input.value) renderSuggestions(getSuggestions(input.value));
+  });
+
+  // Gender buttons
+  document.querySelectorAll('.gender-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedGender = btn.dataset.gender;
+      if (selectedId) showResults();
+    });
+  });
+}
+
+async function selectPokemon(item) {
+  selectedId = item.id;
+  const input = document.getElementById('pokemon-input');
+  input.value = item.displayName;
+  document.getElementById('autocomplete-list').classList.remove('open');
+
+  // Show sprite in input
+  const preview = document.getElementById('sprite-preview');
+  preview.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.id}.png`;
+  preview.style.display = 'block';
+
+  // Fetch species details if not yet loaded
+  await ensureSpeciesLoaded(item.id);
+  updateGenderUI(item.id);
+
+  if (selectedGender || speciesDB[item.id].genderRate === -1 || speciesDB[item.id].genderRate === 0 || speciesDB[item.id].genderRate === 8) {
+    showResults();
+  } else {
+    // Auto-select gender based on availability
+    const sp = speciesDB[item.id];
+    if (sp.genderRate === 0) selectGenderUI('male');
+    else if (sp.genderRate === 8) selectGenderUI('female');
+    else showResults();
+  }
+}
+
+function selectGenderUI(gender) {
+  selectedGender = gender;
+  document.querySelectorAll('.gender-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.gender === gender);
+  });
+}
+
+function updateGenderUI(id) {
+  const sp = speciesDB[id];
+  const btns = document.getElementById('gender-btns');
+  const maleBtn   = btns.querySelector('[data-gender="male"]');
+  const femaleBtn = btns.querySelector('[data-gender="female"]');
+
+  // genderRate: -1 = genderless, 0 = always male, 8 = always female, else both
+  if (sp.genderRate === -1) {
+    // Genderless
+    maleBtn.classList.add('disabled');
+    femaleBtn.classList.add('disabled');
+    maleBtn.classList.remove('selected');
+    femaleBtn.classList.remove('selected');
+    selectedGender = 'genderless';
+  } else if (sp.genderRate === 0) {
+    // Always male
+    femaleBtn.classList.add('disabled');
+    femaleBtn.classList.remove('selected');
+    maleBtn.classList.remove('disabled');
+    selectGenderUI('male');
+  } else if (sp.genderRate === 8) {
+    // Always female
+    maleBtn.classList.add('disabled');
+    maleBtn.classList.remove('selected');
+    femaleBtn.classList.remove('disabled');
+    selectGenderUI('female');
+  } else {
+    maleBtn.classList.remove('disabled');
+    femaleBtn.classList.remove('disabled');
+    if (!selectedGender) selectGenderUI('male');
+  }
+}
+
+async function ensureSpeciesLoaded(id) {
+  const sp = speciesDB[id];
+  if (sp.genderRate !== null) return; // already loaded
+  try {
+    const [speciesData, pokeData] = await Promise.all([
+      fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}/`).then(r => r.json()),
+      fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`).then(r => r.json())
+    ]);
+    sp.genderRate = speciesData.gender_rate;
+    sp.types = pokeData.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1));
+  } catch(e) {
+    sp.genderRate = -2; // unknown
+    sp.types = [];
+  }
+}
+
+// ─────────────────────────────────────────────
+//  RESULTS DISPLAY
+// ─────────────────────────────────────────────
+async function showResults() {
+  const resultsEl = document.getElementById('results');
+  const divider   = document.getElementById('results-divider');
+  resultsEl.style.display = 'block';
+  resultsEl.classList.add('visible');
+  divider.style.display = 'block';
+
+  const sp = speciesDB[selectedId];
+  if (!sp) return;
+
+  // Genderless: only Ditto
+  if (sp.genderRate === -1) {
+    resultsEl.innerHTML = renderGenderlessResult(sp);
+    return;
+  }
+
+  // Undiscovered: cannot breed
+  if (sp.eggGroups && sp.eggGroups.includes('no-eggs')) {
+    resultsEl.innerHTML = renderCannotBreed(sp);
+    return;
+  }
+
+  // Normal breeding: find all compatible pokemon
+  const compatibleGroups = (sp.eggGroups || []).filter(g => g !== 'ditto' && g !== 'no-eggs');
+  if (!compatibleGroups.length) {
+    resultsEl.innerHTML = renderCannotBreed(sp);
+    return;
+  }
+
+  // Show loading
+  resultsEl.innerHTML = `
+    <div class="selected-info">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png"
+           class="selected-sprite" alt="${sp.displayName}" />
+      <div>
+        <div class="selected-name">${sp.displayName} <span style="font-size:9px;color:rgba(255,255,255,0.7)">#${String(selectedId).padStart(3,'0')}</span></div>
+        <div class="selected-meta">
+          ${(sp.types||[]).map(t => `<span class="type-badge type-${t}">${t}</span>`).join('')}
+          &nbsp;·&nbsp; ${compatibleGroups.map(g => EGG_GROUP_DISPLAY[g]?.name || g).join(' / ')} Group${compatibleGroups.length > 1 ? 's' : ''}
+          &nbsp;·&nbsp; ${renderGenderLabel()}
+        </div>
+      </div>
+    </div>
+    <div class="results-loading">
+      <div class="loader-ball"></div>
+    </div>
+  `;
+
+  // Collect all compatible pokemon grouped by egg group
+  const grouped = {}; // eggGroup -> [{id, name, displayName}]
+
+  for (const grp of compatibleGroups) {
+    const members = [];
+    const ids = eggGroupMap[grp] || new Set();
+    for (const pid of ids) {
+      if (pid === selectedId) continue; // skip self (unless you want to include)
+      const psp = speciesDB[pid];
+      if (!psp) continue;
+      // For female selected or genderless-adjacent: exclude always-male-only from female perspective
+      // Actually: as long as they can produce eggs together (opposite gender or Ditto), include them
+      // Simplified: include everyone in same egg group — gender filtering is done at nursery level
+      members.push({ id: pid, name: psp.name, displayName: psp.displayName });
+    }
+    members.sort((a,b) => a.id - b.id);
+    grouped[grp] = members;
+  }
+
+  // Collect all unique pokemon ids we'll need types for
+  const allMemberIds = new Set();
+  for (const grp of compatibleGroups) {
+    for (const m of grouped[grp]) allMemberIds.add(m.id);
+  }
+
+  // Batch-load types for all members (concurrently, up to ~50 at once)
+  const idsToLoad = [...allMemberIds].filter(id => !speciesDB[id]?.types?.length);
+  const BATCH = 40;
+  for (let i = 0; i < idsToLoad.length; i += BATCH) {
+    const chunk = idsToLoad.slice(i, i + BATCH);
+    await Promise.allSettled(chunk.map(id =>
+      fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`)
+        .then(r => r.json())
+        .then(d => {
+          if (speciesDB[id]) {
+            speciesDB[id].types = d.types.map(t =>
+              t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)
             );
+          }
+        })
+        .catch(() => {})
+    ));
+  }
 
-            // For demo, just show first 5 matches
-            if (matches.length > 0) {
-                this.placeholder = matches.slice(0, 5).join(', ');
-            }
-        });
+  // Render
+  let html = `
+    <div class="selected-info">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png"
+           class="selected-sprite" alt="${sp.displayName}" />
+      <div>
+        <div class="selected-name">${sp.displayName} <span style="font-size:9px;color:rgba(255,255,255,0.7)">#${String(selectedId).padStart(3,'0')}</span></div>
+        <div class="selected-meta">
+          ${(sp.types||[]).map(t => `<span class="type-badge type-${t}">${t}</span>`).join('')}
+          &nbsp;·&nbsp; ${compatibleGroups.map(g => EGG_GROUP_DISPLAY[g]?.name || g).join(' / ')} Group${compatibleGroups.length > 1 ? 's' : ''}
+          &nbsp;·&nbsp; ${renderGenderLabel()}
+        </div>
+      </div>
+    </div>
+  `;
 
-        // Search function
-        searchBtn.addEventListener('click', function() {
-            const pokemonName = pokemonInput.value.trim();
-            const gender = document.getElementById('genderSelect').value;
+  for (const grp of compatibleGroups) {
+    const members = grouped[grp];
+    const info = EGG_GROUP_DISPLAY[grp] || { name: grp, icon: '⭕', cls: 'egg-Field' };
+    html += `
+      <div class="egg-group-section">
+        <div class="egg-group-header ${info.cls}">
+          <span class="egg-group-icon">${info.icon}</span>
+          ${info.name} Egg Group
+          <span class="pokemon-count">${members.length} Pokémon</span>
+        </div>
+        <div class="pokemon-grid">
+          ${members.map(m => renderPokemonCard(m)).join('')}
+        </div>
+      </div>
+    `;
+  }
 
-            if (!pokemonName) {
-                alert('Please enter a Pokémon name');
-                return;
-            }
+  // Ditto section always at the bottom
+  html += `
+    <div class="ditto-section">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png" alt="Ditto" />
+      <div>
+        <h4>🔮 Ditto — Always Compatible</h4>
+        <p>Ditto can breed with <strong>${sp.displayName}</strong> regardless of egg group or gender.<br/>
+        The egg produced will always be a <strong>${sp.displayName}</strong> (or its earliest non-baby form).</p>
+      </div>
+    </div>
+  `;
 
-            resultsDiv.innerHTML = '<div class="loading">Loading...</div>';
+  resultsEl.innerHTML = html;
+}
 
-            // Simulate API call with setTimeout
-            setTimeout(() => {
-                displayResults(pokemonName, gender);
-            }, 500);
-        });
+function renderGenderLabel() {
+  if (selectedGender === 'male')     return '♂ Male selected';
+  if (selectedGender === 'female')   return '♀ Female selected';
+  if (selectedGender === 'genderless') return '⚪ Genderless';
+  return '';
+}
 
-        function displayResults(pokemonName, gender) {
-            const pokemon = pokemonData[pokemonName];
+function renderGenderlessResult(sp) {
+  return `
+    <div class="selected-info">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png"
+           class="selected-sprite" alt="${sp.displayName}" />
+      <div>
+        <div class="selected-name">${sp.displayName} <span style="font-size:9px;color:rgba(255,255,255,0.7)">#${String(selectedId).padStart(3,'0')}</span></div>
+        <div class="selected-meta">⚪ Genderless Pokémon</div>
+      </div>
+    </div>
+    <div style="background:#f5f0ff;border:2px solid #c090e0;border-radius:14px;padding:20px 24px;margin-top:4px;">
+      <p style="font-weight:700;color:#6020a0;font-size:14px;">⚪ Genderless — Only compatible with Ditto</p>
+      <p style="margin-top:8px;font-size:13px;color:#503070;">Genderless Pokémon cannot breed with other members of their egg group. The only valid breeding partner is Ditto.</p>
+    </div>
+    <div class="ditto-section" style="margin-top:16px;">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png" alt="Ditto" />
+      <div>
+        <h4>🔮 Ditto — Only Breeding Partner</h4>
+        <p>Leave <strong>${sp.displayName}</strong> + Ditto at the Pokémon Nursery to receive a <strong>${sp.displayName}</strong> egg.</p>
+      </div>
+    </div>
+  `;
+}
 
-            if (!pokemon) {
-                resultsDiv.innerHTML = `<p>Pokémon not found. Please check the spelling.</p>`;
-                return;
-            }
+function renderCannotBreed(sp) {
+  return `
+    <div class="selected-info">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png"
+           class="selected-sprite" alt="${sp.displayName}" />
+      <div>
+        <div class="selected-name">${sp.displayName} <span style="font-size:9px;color:rgba(255,255,255,0.7)">#${String(selectedId).padStart(3,'0')}</span></div>
+        <div class="selected-meta">Undiscovered Egg Group</div>
+      </div>
+    </div>
+    <div class="cannot-breed">
+      <div class="icon">🚫</div>
+      <h3>Cannot Breed</h3>
+      <p>${sp.displayName} is in the <strong>Undiscovered</strong> egg group and cannot breed with any Pokémon, including Ditto.<br/><br/>
+      This applies to most Legendary and Mythical Pokémon, baby Pokémon, Ultra Beasts, and certain special forms.</p>
+    </div>
+  `;
+}
 
-            if (!pokemon.canBreed) {
-                resultsDiv.innerHTML = `<p>${pokemonName} cannot breed (Undiscovered egg group).</p>`;
-                return;
-            }
+function renderPokemonCard(m) {
+  const sp = speciesDB[m.id];
+  const types = sp?.types || [];
+  const typeHtml = types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
+  return `
+    <div class="pokemon-card">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${m.id}.png"
+           alt="${m.displayName}" loading="lazy"
+           onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'" />
+      <span class="pname">${m.displayName}</span>
+      <span class="pdex">#${String(m.id).padStart(3,'0')}</span>
+      ${typeHtml ? `<div class="ptypes">${typeHtml}</div>` : ''}
+    </div>
+  `;
+}
 
-            // In a real implementation, you would:
-            // 1. Get all Pokémon that share at least one egg group
-            // 2. Filter by gender compatibility
-            // 3. Group by egg groups
-
-            // For this demo, we'll show a simplified version
-            const compatiblePokemon = getCompatiblePokemon(pokemon, gender);
-            const groupedByEggGroup = groupByEggGroup(compatiblePokemon);
-
-            let html = `<h2>Breeding Partners for ${pokemonName}</h2>`;
-
-            for (const [eggGroup, pokemonList] of Object.entries(groupedByEggGroup)) {
-                const colorClass = eggGroupColors[eggGroup] || 'field';
-                html += `
-                    <div class="egg-group ${colorClass}">
-                        <h3>${eggGroup} Egg Group</h3>
-                        <div class="pokemon-list">
-                            ${pokemonList.map(p => `<span class="pokemon">${p}</span>`).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            resultsDiv.innerHTML = html;
-        }
-
-        function getCompatiblePokemon(pokemon, gender) {
-            // This is a simplified version - in reality you'd:
-            // 1. Check all Pokémon that share egg groups
-            // 2. Apply gender rules (e.g., male can breed with female or Ditto)
-            // 3. Handle special cases (Nidorina/Nidoqueen, etc.)
-
-            const allPokemon = Object.keys(pokemonData);
-            const compatible = [];
-
-            // For demo, just return some example Pokémon
-            if (pokemon.eggGroups.includes("Field")) {
-                compatible.push("Pikachu", "Eevee", "Skitty");
-            }
-            if (pokemon.eggGroups.includes("Fairy")) {
-                compatible.push("Jigglypuff", "Clefairy", "Snorlax");
-            }
-            if (pokemon.eggGroups.includes("Monster")) {
-                compatible.push("Charizard", "Bulbasaur", "Squirtle");
-            }
-
-            // Always include Ditto
-            compatible.push("Ditto");
-
-            return compatible;
-        }
-
-        function groupByEggGroup(pokemonList) {
-            // In reality, you'd group by the egg groups they share with the selected Pokémon
-            // This is simplified for the demo
-
-            const groups = {
-                "Field": [],
-                "Fairy": [],
-                "Monster": [],
-                "Ditto": ["Ditto"]
-            };
-
-            pokemonList.forEach(p => {
-                const pokemon = pokemonData[p];
-                if (!pokemon) return;
-
-                if (p === "Ditto") {
-                    groups["Ditto"].push(p);
-                } else if (pokemon.eggGroups.includes("Field")) {
-                    groups["Field"].push(p);
-                } else if (pokemon.eggGroups.includes("Fairy")) {
-                    groups["Fairy"].push(p);
-                } else if (pokemon.eggGroups.includes("Monster")) {
-                    groups["Monster"].push(p);
-                }
-            });
-
-            // Remove empty groups
-            Object.keys(groups).forEach(key => {
-                if (groups[key].length === 0) {
-                    delete groups[key];
-                }
-            });
-
-            return groups;
-        }
-    </script>
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+loadAllData().catch(err => {
+  document.getElementById('loader').innerHTML = `
+    <div class="error-box">
+      ⚠️ Failed to load Pokédex data. Please check your internet connection and refresh.
+      <br/><small>${err.message}</small>
+    </div>
+  `;
+});
+</script>
 </body>
 </html>
