@@ -628,6 +628,7 @@ const RARITY_DATA = {
   'cubone': 'VeryRare',
   'cutiefly': 'Uncommon',
   'cyndaquil': 'Common',
+  'd': 'ExtremelyRare',
   'darkrai': 'Legendary',
   'darmanitan': 'ExtremelyRare',
   'dartrix': 'ExtremelyRare',
@@ -693,7 +694,6 @@ const RARITY_DATA = {
   'exeggcute': 'Common',
   'exeggutor': 'Common',
   'exploud': 'Common',
-  'farfetch'd': 'ExtremelyRare',
   'farfetch-d': 'ExtremelyRare',
   'farfetchd': 'ExtremelyRare',
   'fearow': 'Common',
@@ -1327,10 +1327,20 @@ let selectedId = null;
 // ═══════════════════════════════════════════════
 //  LOAD DATA
 // ═══════════════════════════════════════════════
+function fetchWithTimeout(url, ms = 15000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { signal: controller.signal })
+    .then(r => { clearTimeout(id); return r.json(); })
+    .catch(e => { clearTimeout(id); throw e; });
+}
+
 async function loadAllData() {
+  // Update loader message
+  document.querySelector('#loader p').textContent = 'Connecting to PokéAPI...';
+
   // Fetch all species list (#1-807)
-  const speciesList = await fetch('https://pokeapi.co/api/v2/pokemon-species?limit=807&offset=0')
-    .then(r => r.json());
+  const speciesList = await fetchWithTimeout('https://pokeapi.co/api/v2/pokemon-species?limit=807&offset=0', 20000);
 
   // Build basic list
   pokemonList = [];
@@ -1437,7 +1447,7 @@ async function ensureTypesLoaded(id) {
   const sp = speciesDB[id];
   if (sp.types.length) return;
   try {
-    const data = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`).then(r => r.json());
+    const data = await fetchWithTimeout(`https://pokeapi.co/api/v2/pokemon/${id}/`, 10000);
     sp.types = data.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1));
   } catch(e) {
     sp.types = [];
@@ -1477,7 +1487,7 @@ async function showResults() {
   for (let i = 0; i < needTypes.length; i += BATCH) {
     const chunk = needTypes.slice(i, i + BATCH);
     await Promise.allSettled(chunk.map(p =>
-      fetch(`https://pokeapi.co/api/v2/pokemon/${p.id}/`)
+      fetch(`https://pokeapi.co/api/v2/pokemon/${p.id}/`, { signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined })
         .then(r => r.json())
         .then(d => {
           if (speciesDB[p.id]) {
@@ -1599,8 +1609,16 @@ function renderPokemonCard(m) {
 // ═══════════════════════════════════════════════
 loadAllData().catch(err => {
   document.getElementById('loader').innerHTML = `
-    <div style="background:#fff5f5;border:2px solid #fca5a5;border-radius:10px;padding:16px;color:#dc2626;font-weight:700;font-size:13px;">
-      ⚠️ Failed to load Pokédex data. Check your connection and refresh.<br/><small>${err.message}</small>
+    <div style="background:#fff5f5;border:2px solid #fca5a5;border-radius:10px;padding:20px;color:#dc2626;font-weight:700;font-size:13px;text-align:left;">
+      ⚠️ Failed to load Pokédex data from PokéAPI.<br/><br/>
+      <strong>Common causes:</strong><br/>
+      &bull; No internet connection<br/>
+      &bull; PokéAPI is temporarily down or rate-limiting<br/>
+      &bull; Request timed out<br/><br/>
+      <strong>Try:</strong> Refresh the page, or visit
+      <a href="https://pokeapi.co" target="_blank" style="color:#dc2626;">pokeapi.co</a>
+      to check API status.<br/><br/>
+      <small style="opacity:0.7">${err.message || err}</small>
     </div>
   `;
 });
