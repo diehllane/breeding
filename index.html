@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pokémon Breeding Chart — USUM Gen 7</title>
+  <title>PokeNexus Breeding Compatibility Chart</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -13,11 +13,9 @@
       --yellow:      #f7c948;
       --yellow-dark: #d4a016;
       --red:         #cc2222;
-      --white:       #f8f8f8;
       --offwhite:    #eef1f9;
       --gray:        #6b7280;
       --text:        #1a1a2e;
-      --card-bg:     #ffffff;
       --shadow:      rgba(40,85,174,0.18);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,8 +27,6 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
-    /* ── Pokéball animated background ── */
     body::before {
       content: '';
       position: fixed;
@@ -41,8 +37,6 @@
         linear-gradient(160deg, #1a3a7a 0%, #0d1f4a 60%, #0a1530 100%);
       z-index: 0;
     }
-
-    /* Floating pokeball watermarks */
     body::after {
       content: '';
       position: fixed;
@@ -54,7 +48,6 @@
       pointer-events: none;
     }
 
-    /* ── HEADER ── */
     header {
       position: relative;
       z-index: 10;
@@ -63,12 +56,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
-
     .logo-text {
       font-family: 'Press Start 2P', monospace;
-      font-size: clamp(22px, 5vw, 42px);
+      font-size: clamp(14px, 3.5vw, 28px);
       color: var(--yellow);
       text-shadow: 3px 3px 0 var(--yellow-dark), 5px 5px 0 rgba(0,0,0,0.3), 0 0 40px rgba(247,201,72,0.5);
       letter-spacing: 2px;
@@ -78,35 +70,39 @@
       0%,100% { transform: translateY(0); }
       50%      { transform: translateY(-6px); }
     }
-
     header h1 {
       font-family: 'Press Start 2P', monospace;
-      font-size: clamp(9px, 2.2vw, 14px);
+      font-size: clamp(7px, 1.8vw, 11px);
       color: var(--yellow);
-      text-shadow: 2px 2px 0 var(--yellow-dark), 0 0 20px rgba(247,201,72,0.4);
+      text-shadow: 2px 2px 0 var(--yellow-dark);
       letter-spacing: 1px;
       line-height: 1.7;
     }
-
     .subtitle {
-      font-size: 13px;
+      font-size: 12px;
       color: rgba(255,255,255,0.65);
       font-weight: 600;
       letter-spacing: 2px;
       text-transform: uppercase;
     }
+    .subtitle-godot {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: rgba(247,201,72,0.7);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
 
-    /* ── MAIN CARD ── */
     main {
       position: relative;
       z-index: 10;
-      max-width: 820px;
+      max-width: 860px;
       margin: 0 auto 60px;
       padding: 0 20px;
     }
 
     .card {
-      background: var(--card-bg);
+      background: #ffffff;
       border-radius: 20px;
       box-shadow: 0 8px 40px var(--shadow), 0 2px 0 var(--yellow) inset;
       padding: 28px;
@@ -114,11 +110,7 @@
     }
 
     /* ── LOADER ── */
-    #loader {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--blue);
-    }
+    #loader { text-align: center; padding: 60px 20px; }
     .loader-ball {
       width: 60px; height: 60px;
       border-radius: 50%;
@@ -139,7 +131,6 @@
       border: 4px solid #222;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
     #loader p {
       font-family: 'Press Start 2P', monospace;
       font-size: 9px;
@@ -148,7 +139,7 @@
     }
     @keyframes blink { 50% { opacity: 0; } }
 
-    /* ── SEARCH SECTION ── */
+    /* ── SEARCH ── */
     .search-section { display: none; }
     .search-section.visible { display: block; }
 
@@ -160,19 +151,10 @@
       margin-bottom: 8px;
     }
 
-    .search-row {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-
     .input-wrap {
-      flex: 1;
-      min-width: 220px;
       position: relative;
+      max-width: 480px;
     }
-
     #pokemon-input {
       width: 100%;
       padding: 14px 44px 14px 16px;
@@ -190,7 +172,6 @@
       border-color: var(--blue);
       box-shadow: 0 0 0 4px rgba(40,85,174,0.15);
     }
-
     .sprite-preview {
       position: absolute;
       right: 8px; top: 50%;
@@ -198,7 +179,6 @@
       width: 36px; height: 36px;
       object-fit: contain;
     }
-
     .autocomplete-list {
       position: absolute;
       top: calc(100% + 4px);
@@ -206,7 +186,7 @@
       background: white;
       border: 2px solid var(--blue-light);
       border-radius: 10px;
-      max-height: 200px;
+      max-height: 220px;
       overflow-y: auto;
       z-index: 100;
       box-shadow: 0 8px 24px rgba(0,0,0,0.15);
@@ -223,55 +203,25 @@
       gap: 10px;
       transition: background 0.12s;
     }
-    .autocomplete-item:hover, .autocomplete-item.active {
-      background: var(--offwhite);
-    }
-    .autocomplete-item img {
-      width: 30px; height: 30px;
-      object-fit: contain;
-    }
-    .autocomplete-item .dex-num {
-      font-size: 11px;
-      color: var(--gray);
-      font-weight: 600;
+    .autocomplete-item:hover, .autocomplete-item.active { background: var(--offwhite); }
+    .autocomplete-item img { width: 30px; height: 30px; object-fit: contain; }
+    .autocomplete-item .dex-num { font-size: 11px; color: var(--gray); font-weight: 600; }
+    .autocomplete-item .rarity-pill {
       margin-left: auto;
-    }
-
-    /* ── GENDER SELECT ── */
-    .gender-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .gender-btns {
-      display: flex;
-      gap: 8px;
-    }
-
-    .gender-btn {
-      padding: 12px 18px;
-      border: 3px solid var(--blue-light);
-      border-radius: 10px;
-      background: var(--offwhite);
-      cursor: pointer;
-      font-family: 'Nunito', sans-serif;
+      font-size: 10px;
       font-weight: 800;
-      font-size: 15px;
-      color: var(--blue-dark);
-      transition: all 0.15s;
+      padding: 2px 7px;
+      border-radius: 20px;
+      white-space: nowrap;
     }
-    .gender-btn:hover { background: #dce6ff; }
-    .gender-btn.selected {
-      background: var(--blue);
-      border-color: var(--blue-dark);
-      color: white;
-    }
-    .gender-btn.disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
+
+    /* ── RARITY COLORS ── */
+    .rarity-Common      { background: #e0e0e0; color: #444; }
+    .rarity-Uncommon    { background: #a0c840; color: #1a3a00; }
+    .rarity-Rare        { background: #4090e0; color: #fff; }
+    .rarity-VeryRare    { background: #9040d0; color: #fff; }
+    .rarity-ExtremelyRare { background: #e04020; color: #fff; }
+    .rarity-Legendary   { background: linear-gradient(135deg, #f7c948, #e07820); color: #fff; }
 
     /* ── TYPE BADGE ── */
     .type-badge {
@@ -303,7 +253,6 @@
     .type-Steel     { background: #b8b8d0; color: #333; }
     .type-Fairy     { background: #ee99ac; }
 
-    /* ── DIVIDER ── */
     .divider {
       border: none;
       border-top: 2px dashed #d0d8ee;
@@ -337,54 +286,37 @@
     }
     .selected-meta {
       font-size: 13px;
-      color: rgba(255,255,255,0.8);
+      color: rgba(255,255,255,0.85);
       font-weight: 600;
-      margin-top: 4px;
+      margin-top: 6px;
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       align-items: center;
     }
-
-    /* Cannot breed */
-    .cannot-breed {
-      text-align: center;
-      padding: 32px 20px;
-      background: linear-gradient(135deg, #fff0f0 0%, #fdd9d9 100%);
-      border-radius: 14px;
-      border: 2px solid #f5c0c0;
-    }
-    .cannot-breed .icon { font-size: 40px; margin-bottom: 12px; }
-    .cannot-breed h3 {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 10px;
-      color: var(--red);
-      margin-bottom: 8px;
-    }
-    .cannot-breed p {
-      font-size: 13px;
-      color: #a04040;
+    .rarity-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
     }
 
-    /* Egg group sections */
-    .egg-group-section {
-      margin-bottom: 24px;
-    }
-
-    .egg-group-header {
+    /* ── TYPE GROUP SECTIONS ── */
+    .type-group-section { margin-bottom: 24px; }
+    .type-group-header {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 12px;
-      padding: 10px 14px;
+      padding: 10px 16px;
       border-radius: 10px;
+      color: white;
       font-family: 'Press Start 2P', monospace;
       font-size: 9px;
-      color: white;
     }
-
-    .egg-group-icon { font-size: 18px; }
-    .pokemon-count {
+    .type-count {
       margin-left: auto;
       font-family: 'Nunito', sans-serif;
       font-size: 13px;
@@ -394,29 +326,32 @@
       border-radius: 20px;
     }
 
-    /* Egg group colors */
-    .egg-Monster    { background: linear-gradient(135deg, #7038c8, #5020a0); }
-    .egg-Water1     { background: linear-gradient(135deg, #4080e0, #2050b8); }
-    .egg-Bug        { background: linear-gradient(135deg, #80a020, #608010); }
-    .egg-Flying     { background: linear-gradient(135deg, #8080d0, #6060b0); }
-    .egg-Field      { background: linear-gradient(135deg, #d08030, #a06010); }
-    .egg-Fairy      { background: linear-gradient(135deg, #d860a8, #b04088); }
-    .egg-Grass      { background: linear-gradient(135deg, #50b850, #30903a); }
-    .egg-HumanLike  { background: linear-gradient(135deg, #f05050, #c03030); }
-    .egg-Mineral    { background: linear-gradient(135deg, #9090a0, #606070); }
-    .egg-Amorphous  { background: linear-gradient(135deg, #8840c0, #602090); }
-    .egg-Water2     { background: linear-gradient(135deg, #2090d8, #1060a0); }
-    .egg-Water3     { background: linear-gradient(135deg, #30b0c0, #108090); }
-    .egg-Dragon     { background: linear-gradient(135deg, #6028e8, #4010b0); }
-    .egg-Ditto      { background: linear-gradient(135deg, #c06090, #903060); }
+    /* Type header bg colors */
+    .th-Normal    { background: linear-gradient(135deg, #a8a878, #807860); }
+    .th-Fire      { background: linear-gradient(135deg, #f08030, #c05010); }
+    .th-Water     { background: linear-gradient(135deg, #6890f0, #4060c0); }
+    .th-Electric  { background: linear-gradient(135deg, #c8a010, #a07800); }
+    .th-Grass     { background: linear-gradient(135deg, #58a830, #387818); }
+    .th-Ice       { background: linear-gradient(135deg, #68b8b8, #408888); }
+    .th-Fighting  { background: linear-gradient(135deg, #c03028, #901820); }
+    .th-Poison    { background: linear-gradient(135deg, #a040a0, #702070); }
+    .th-Ground    { background: linear-gradient(135deg, #b09040, #806820); }
+    .th-Flying    { background: linear-gradient(135deg, #7870d0, #5050a0); }
+    .th-Psychic   { background: linear-gradient(135deg, #f85888, #c02858); }
+    .th-Bug       { background: linear-gradient(135deg, #889010, #586000); }
+    .th-Rock      { background: linear-gradient(135deg, #a09038, #706018); }
+    .th-Ghost     { background: linear-gradient(135deg, #705898, #503070); }
+    .th-Dragon    { background: linear-gradient(135deg, #5028d8, #3008a8); }
+    .th-Dark      { background: linear-gradient(135deg, #705848, #402820); }
+    .th-Steel     { background: linear-gradient(135deg, #9898b8, #686880); }
+    .th-Fairy     { background: linear-gradient(135deg, #e87898, #b84870); }
 
-    /* Pokemon grid */
+    /* ── POKEMON GRID ── */
     .pokemon-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
       gap: 10px;
     }
-
     .pokemon-card {
       background: var(--offwhite);
       border: 2px solid #d8e0f0;
@@ -424,7 +359,6 @@
       padding: 10px 8px 8px;
       text-align: center;
       transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-      cursor: default;
     }
     .pokemon-card:hover {
       transform: translateY(-3px);
@@ -437,27 +371,26 @@
       image-rendering: pixelated;
     }
     .pokemon-card .pname {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--text);
-      line-height: 1.3;
-      margin-top: 4px;
-      display: block;
+      font-size: 11px; font-weight: 800;
+      color: var(--text); line-height: 1.3;
+      margin-top: 4px; display: block;
     }
     .pokemon-card .pdex {
-      font-size: 10px;
-      color: var(--gray);
-      font-weight: 600;
+      font-size: 10px; color: var(--gray); font-weight: 600;
     }
     .pokemon-card .ptypes {
       margin-top: 4px;
-      display: flex;
-      gap: 3px;
-      justify-content: center;
-      flex-wrap: wrap;
+      display: flex; gap: 3px;
+      justify-content: center; flex-wrap: wrap;
+    }
+    .pokemon-card .prarity {
+      margin-top: 4px;
+      font-size: 10px; font-weight: 800;
+      padding: 1px 6px; border-radius: 10px;
+      display: inline-block;
     }
 
-    /* Ditto section */
+    /* ── DITTO SECTION ── */
     .ditto-section {
       margin-top: 28px;
       padding: 16px 18px;
@@ -479,45 +412,35 @@
       color: #903060;
       margin-bottom: 6px;
     }
-    .ditto-section p {
-      font-size: 12px;
-      color: #604050;
-      font-weight: 600;
-    }
+    .ditto-section p { font-size: 12px; color: #604050; font-weight: 600; }
 
-    /* Error */
-    .error-box {
-      background: #fff5f5;
-      border: 2px solid #fca5a5;
-      border-radius: 10px;
-      padding: 16px;
-      color: #dc2626;
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    /* Loading spinner in results */
-    .results-loading {
+    /* ── NO RESULTS ── */
+    .no-results {
       text-align: center;
-      padding: 40px;
+      padding: 32px 20px;
+      background: #f8f0ff;
+      border-radius: 14px;
+      border: 2px solid #d0a0f0;
     }
-    .results-loading .loader-ball {
-      width: 40px; height: 40px;
+    .no-results .icon { font-size: 36px; margin-bottom: 12px; }
+    .no-results h3 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: #6020a0;
+      margin-bottom: 8px;
     }
+    .no-results p { font-size: 13px; color: #604080; font-weight: 600; }
 
-    /* ── FOOTER ── */
+    .results-loading { text-align: center; padding: 40px; }
+    .results-loading .loader-ball { width: 40px; height: 40px; }
+
     footer {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      padding: 20px;
+      position: relative; z-index: 10;
+      text-align: center; padding: 20px;
       color: rgba(255,255,255,0.4);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
     }
 
-    /* responsive */
     @media (max-width: 600px) {
       .pokemon-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); }
     }
@@ -526,148 +449,709 @@
 <body>
 
   <header>
-    <div class="logo-text">Pokémon</div>
+    <div class="logo-text">PokeNexus</div>
     <h1>Breeding Compatibility Chart</h1>
     <span class="subtitle">Ultra Sun &amp; Ultra Moon · Generation VII</span>
+    <span class="subtitle-godot">Godot</span>
   </header>
 
   <main>
     <div class="card">
 
-      <!-- Loader -->
       <div id="loader">
         <div class="loader-ball"></div>
         <p>Loading Pokédex data...</p>
       </div>
 
-      <!-- Search Section -->
       <div class="search-section" id="search-section">
         <label class="search-label" for="pokemon-input">Choose a Pokémon</label>
-        <div class="search-row">
-          <div class="input-wrap">
-            <input type="text" id="pokemon-input" placeholder="Start typing a name…" autocomplete="off" />
-            <img src="" alt="" class="sprite-preview" id="sprite-preview" style="display:none;" />
-            <div class="autocomplete-list" id="autocomplete-list"></div>
-          </div>
-
-          <div class="gender-group">
-            <label class="search-label">Gender</label>
-            <div class="gender-btns" id="gender-btns">
-              <button class="gender-btn" data-gender="male">♂ Male</button>
-              <button class="gender-btn" data-gender="female">♀ Female</button>
-            </div>
-          </div>
+        <div class="input-wrap">
+          <input type="text" id="pokemon-input" placeholder="Start typing a name…" autocomplete="off" />
+          <img src="" alt="" class="sprite-preview" id="sprite-preview" style="display:none;" />
+          <div class="autocomplete-list" id="autocomplete-list"></div>
         </div>
       </div>
 
       <hr class="divider" id="results-divider" style="display:none;" />
-
-      <!-- Results -->
       <div id="results"></div>
 
     </div>
   </main>
 
   <footer>
-    Data sourced from PokéAPI · Pokémon © Nintendo/Game Freak · Fan tool for USUM Gen VII
+    Data sourced from PokéAPI · PokeNexus fan tool · Godot Edition
   </footer>
 
 <script>
-// ─────────────────────────────────────────────
-//  DATA & STATE
-// ─────────────────────────────────────────────
-const EGG_GROUPS = [
-  'monster','water1','bug','flying','field','fairy',
-  'grass','human-like','mineral','amorphous',
-  'water2','water3','dragon','ditto','no-eggs'
-];
+// ═══════════════════════════════════════════════
+//  RARITY DATABASE
+//  Keys are lowercase pokemon names matching PokeAPI
+// ═══════════════════════════════════════════════
+const RARITY = (() => {
+  const R = {};
+  const set = (rarity, ...names) => names.forEach(n => R[n.toLowerCase()] = rarity);
 
-const EGG_GROUP_DISPLAY = {
-  'monster':    { name: 'Monster',    icon: '🦕', cls: 'egg-Monster'    },
-  'water1':     { name: 'Water 1',    icon: '🐸', cls: 'egg-Water1'     },
-  'bug':        { name: 'Bug',        icon: '🐛', cls: 'egg-Bug'        },
-  'flying':     { name: 'Flying',     icon: '🦅', cls: 'egg-Flying'     },
-  'field':      { name: 'Field',      icon: '🦊', cls: 'egg-Field'      },
-  'fairy':      { name: 'Fairy',      icon: '🧚', cls: 'egg-Fairy'      },
-  'grass':      { name: 'Grass',      icon: '🌿', cls: 'egg-Grass'      },
-  'human-like': { name: 'Human-Like', icon: '🥊', cls: 'egg-HumanLike'  },
-  'mineral':    { name: 'Mineral',    icon: '⚙️', cls: 'egg-Mineral'    },
-  'amorphous':  { name: 'Amorphous',  icon: '👻', cls: 'egg-Amorphous'  },
-  'water2':     { name: 'Water 2',    icon: '🐟', cls: 'egg-Water2'     },
-  'water3':     { name: 'Water 3',    icon: '🦀', cls: 'egg-Water3'     },
-  'dragon':     { name: 'Dragon',     icon: '🐉', cls: 'egg-Dragon'     },
-  'ditto':      { name: 'Ditto',      icon: '🔮', cls: 'egg-Ditto'      },
-  'no-eggs':    { name: 'Undiscovered', icon: '🚫', cls: 'egg-Ditto'   },
-};
-
-// Gen 7 USUM national dex: #1-807
-const MAX_DEX = 807;
-
-// species data: id -> { name, eggGroups[], genderRate, types[] }
-let speciesDB = {};       // key = species id (number)
-let pokemonList = [];     // [{id, name, displayName}] sorted by id
-let eggGroupMap = {};     // eggGroup -> Set of species ids
-
-let selectedId   = null;
-let selectedGender = null;
-
-// ─────────────────────────────────────────────
-//  LOAD DATA
-// ─────────────────────────────────────────────
-async function loadAllData() {
-  // Step 1: fetch all egg groups (parallel)
-  const eggGroupFetches = EGG_GROUPS.map(g =>
-    fetch(`https://pokeapi.co/api/v2/egg-group/${g}/`)
-      .then(r => r.json())
-      .then(data => ({ key: g, data }))
-      .catch(() => ({ key: g, data: null }))
+  // ── LEGENDARY ──
+  set('Legendary',
+    // Birds / beasts
+    'zapdos','articuno','moltres','mewtwo',
+    'raikou','entei','suicune','lugia','ho-oh',
+    'regirock','regice','registeel','latias','latios',
+    'kyogre','groudon','rayquaza',
+    'uxie','mesprit','azelf','dialga','palkia','giratina',
+    'heatran','regigigas','cresselia','phione','manaphy',
+    'darkrai','shaymin','arceus',
+    'victini','cobalion','terrakion','virizion','tornadus','thundurus',
+    'reshiram','zekrom','landorus','kyurem','keldeo',
+    'xerneas','yveltal','zygarde',
+    'diancie','hoopa','volcanion',
+    'tapu-koko','tapu-lele','tapu-bulu','tapu-fini',
+    'cosmog','cosmoem','solgaleo','lunala',
+    'nihilego','buzzwole','pheromosa','xurkitree','celesteela','kartana','guzzlord',
+    'necrozma','magearna','marshadow','poipole','naganadel',
+    'stakataka','blacephalon','zeraora',
+    'genesect','jirachi',
+    // Legendary event
+    'regice',
+    // Elite shop
+    'virizion',
+    // Clan wars
+    'kyurem',
+    // PVP shop legendaries
+    'deoxys',
+    // Events
+    'celebi','volcanion'
   );
 
-  // Step 2: get all species list to resolve names (#1-807)
-  const speciesListFetch = fetch('https://pokeapi.co/api/v2/pokemon-species?limit=807&offset=0')
+  // ── EXTREMELY RARE ──
+  set('ExtremelyRare',
+    // Professor Oak starters
+    'charmander','bulbasaur','squirtle','cyndaquil','chikorita','totodile',
+    'treecko','torchic','mudkip','turtwig','chimchar','piplup',
+    'snivy','tepig','oshawott','chespin','fennekin','froakie',
+    'rowlet','litten','popplio','eevee',
+    // Pokemon Box
+    'lapras','tyrogue','togepi','lickitung','porygon','meloetta','swirlix','flabebe',
+    // Fossils
+    'kabuto','omanyte','aerodactyl','lileep','anorith','cranidos','shieldon',
+    'amaura','tirtouga','archen','tyrunt',
+    // Casino ER
+    'beldum','shuckle','riolu','budew','slakoth','ralts','sableye',
+    // PVP shop ER
+    'honedge','axew','throh','sawk','vullaby','mienfoo','darumaka',
+    'mimikyu','scyther','sneasel','gligar','mawile','hippopotas','pawniard',
+    'dewpider','ferroseed','drilbur','tangela','croagunk','alomomola',
+    'scraggy','corphish','meditite','pineco','shroomish',
+    // Clan wars ER
+    'larvitar',
+    // Battle tower ER
+    'bronzor','spritzee','skrelp','cleffa','abra','growlithe',
+    // Event ER
+    'noibat','bergmite','cubchoo','vanillite',
+    // Greninja-Bond / Greninja
+    'greninja',
+    // Starter evolutions share rarity with base
+    'charmeleon','charizard','ivysaur','venusaur','wartortle','blastoise',
+    'quilava','typhlosion','bayleef','meganium','croconaw','feraligatr',
+    'grovyle','sceptile','combusken','blaziken','marshtomp','swampert',
+    'grotle','torterra','monferno','infernape','prinplup','empoleon',
+    'servine','serperior','pignite','emboar','dewott','samurott',
+    'quilladin','chesnaught','braixen','delphox','frogadier',
+    'dartrix','decidueye','torracat','incineroar','brionne','primarina',
+    'vaporeon','jolteon','flareon','espeon','umbreon','leafeon','glaceon','sylveon',
+    // Fossil evolutions
+    'kabutops','omastar','linoone','linoone-galar',
+    'cradily','armaldo','rampardos','bastiodon',
+    'aurorus','carracosta','archeops','tyrantrum',
+    // Other ER wild spawns
+    'snorlax','kangaskhan','pinsir','scyther','heracross','dratini','dragonair','dragonite',
+    'metagross','metang',
+    'deino','zweilous','hydreigon',
+    'goomy','sliggoo','goodra',
+    'larvesta','volcarona','jangmo-o','hakamo-o','kommo-o',
+    'bagon','shelgon','salamence',
+    'gible','gabite','garchomp',
+    'beldum','metang','metagross',
+    'axew','fraxure','haxorus',
+    'drilbur','excadrill',
+    'pawniard','bisharp',
+    'vullaby','mandibuzz',
+    'mienfoo','mienshao',
+    'foongus','amoonguss',
+    'honedge','doublade','aegislash',
+    'skrelp','dragalge',
+    'clauncher','clawitzer',
+    'amaura','aurorus',
+    'tyrunt','tyrantrum',
+    'noibat','noivern',
+    'turtonator','drampa',
+    'dhelmise','wimpod','golisopod',
+    'sandygast','palossand',
+    'pyukumuku','type-null','silvally',
+    'minior','komala','oranguru','passimian',
+    'salandit','salazzle',
+    'bruxish',
+    'tapu-koko','tapu-lele','tapu-bulu','tapu-fini'
+  );
+
+  // ── VERY RARE ──
+  set('VeryRare',
+    'pikachu','raichu',
+    'abra','kadabra','alakazam',
+    'slowpoke','slowbro','slowking',
+    'chansey','blissey','happiny',
+    'clefairy','clefable',
+    'jigglypuff','wigglytuff',
+    'vulpix','ninetales',
+    'growlithe','arcanine',
+    'ditto',
+    'doduo','dodrio',
+    'tauros','miltank',
+    'stantler',
+    'natu','xatu',
+    'girafarig',
+    'mareep','flaaffy','ampharos',
+    'houndour','houndoom',
+    'yanma','yanmega',
+    'wobbuffet','wynaut',
+    'murkrow','honchkrow',
+    'misdreavus','mismagius',
+    'sneasel','weavile',
+    'teddiursa','ursaring',
+    'phanpy','donphan',
+    'magby','magmar','magmortar',
+    'elekid','electabuzz','electivire',
+    'smoochum','jynx',
+    'swinub','piloswine','mamoswine',
+    'gligar','gliscor',
+    'ponyta','rapidash',
+    'cubone','marowak',
+    'absol',
+    'tropius','tangela','tangrowth',
+    'exeggcute','exeggutor',
+    'staryu','starmie',
+    'corsola',
+    'ditto',
+    'solrock','lunatone',
+    'zangoose','seviper',
+    'castform',
+    'kecleon',
+    'shuppet','banette',
+    'duskull','dusclops','dusknoir',
+    'chimecho','chingling',
+    'spinda',
+    'electrike','manectric',
+    'nosepass','probopass',
+    'torkoal',
+    'cacnea','cacturne',
+    'swablu','altaria',
+    'lileep','cradily',
+    'anorith','armaldo',
+    'feebas','milotic',
+    'clamperl','huntail','gorebyss',
+    'relicanth',
+    'chinchou','lanturn',
+    'mantine','mantyke',
+    'skarmory',
+    'delibird',
+    'hoppip','skiploom','jumpluff',
+    'pineco','forretress',
+    'snubbull','granbull',
+    'teddiursa','ursaring',
+    'primeape','mankey',
+    'jolteon',
+    'makuhita','hariyama',
+    'meditite','medicham',
+    'snorunt','glalie','froslass',
+    'spheal','sealeo','walrein',
+    'carvanha','sharpedo',
+    'wailmer','wailord',
+    'numel','camerupt',
+    'spoink','grumpig',
+    'trapinch','vibrava','flygon',
+    'baltoy','claydol',
+    'seviper',
+    'zangoose',
+    'relicanth',
+    'luvdisc',
+    'bagon','shelgon',
+    'beldum',
+    'roselia','budew','roserade',
+    'shinx','luxio','luxray',
+    'buizel','floatzel',
+    'drifloon','drifblim',
+    'mismagius',
+    'honchkrow',
+    'stunky','skuntank',
+    'bronzor','bronzong',
+    'chatot',
+    'carnivine',
+    'finneon','lumineon',
+    'snover','abomasnow',
+    'rotom',
+    'uxie','mesprit','azelf',
+    'spiritomb',
+    'riolu','lucario',
+    'hippopotas','hippowdon',
+    'skorupi','drapion',
+    'croagunk','toxicroak',
+    'leafeon','glaceon',
+    'gliscor',
+    'mamoswine',
+    'gallade',
+    'probopass',
+    'gothita','gothorita','gothitelle',
+    'solosis','duosion','reuniclus',
+    'ducklett','swanna',
+    'vanillite','vanillish','vanilluxe',
+    'deerling','sawsbuck',
+    'emolga',
+    'karrablast','escavalier',
+    'foongus','amoonguss',
+    'frillish','jellicent',
+    'joltik','galvantula',
+    'ferroseed','ferrothorn',
+    'klink','klang','klinklang',
+    'elgyem','beheeyem',
+    'litwick','lampent','chandelure',
+    'axew','fraxure','haxorus',
+    'cubchoo','beartic',
+    'cryogonal',
+    'shelmet','accelgor',
+    'stunfisk',
+    'mienfao','mienshao',
+    'druddigon',
+    'golett','golurk',
+    'pawniard','bisharp',
+    'bouffalant',
+    'rufflet','braviary',
+    'vullaby','mandibuzz',
+    'heatmor','durant',
+    'deino','zweilous','hydreigon',
+    'larvesta','volcarona',
+    'fletchling','fletchinder','talonflame',
+    'scatterbug','spewpa','vivillon',
+    'litleo','pyroar',
+    'flabebe','floette','florges',
+    'skiddo','gogoat',
+    'pancham','pangoro',
+    'furfrou',
+    'espurr','meowstic',
+    'honedge','doublade','aegislash',
+    'spritzee','aromatisse',
+    'swirlix','slurpuff',
+    'inkay','malamar',
+    'binacle','barbaracle',
+    'skrelp','dragalge',
+    'clauncher','clawitzer',
+    'helioptile','heliolisk',
+    'tyrunt','tyrantrum',
+    'amaura','aurorus',
+    'sylveon',
+    'hawlucha',
+    'dedenne',
+    'carbink',
+    'goomy','sliggoo','goodra',
+    'klefki',
+    'phantump','trevenant',
+    'pumpkaboo','gourgeist',
+    'bergmite','avalugg',
+    'noibat','noivern',
+    'yveltal',
+    'zygarde',
+    'diancie',
+    'rowlet','dartrix','decidueye',
+    'litten','torracat','incineroar',
+    'popplio','brionne','primarina',
+    'pikipek','trumbeak','toucannon',
+    'grubbin','charjabug','vikavolt',
+    'crabrawler','crabominable',
+    'oricorio',
+    'cutiefly','ribombee',
+    'rockruff','lycanroc',
+    'wishiwashi',
+    'mareanie','toxapex',
+    'mudbray','mudsdale',
+    'dewpider','araquanid',
+    'fomantis','lurantis',
+    'morelull','shiinotic',
+    'salandit','salazzle',
+    'stufful','bewear',
+    'bounsweet','steenee','tsareena',
+    'comfey',
+    'oranguru','passimian',
+    'wimpod','golisopod',
+    'sandygast','palossand',
+    'pyukumuku',
+    'type-null','silvally',
+    'minior',
+    'komala',
+    'turtonator',
+    'togedemaru',
+    'mimikyu',
+    'bruxish',
+    'drampa',
+    'dhelmise',
+    'jangmo-o','hakamo-o','kommo-o',
+    'tapu-koko','tapu-lele','tapu-bulu','tapu-fini',
+    'buzzwole','pheromosa','xurkitree','celesteela','kartana','guzzlord',
+    'poipole','naganadel','stakataka','blacephalon'
+  );
+
+  // ── RARE ──
+  set('Rare',
+    'pichu','cleffa','igglybuff','togepi','togetic','togekiss',
+    'marill','azumarill','azurill',
+    'sudowoodo','bonsly',
+    'aipom','ambipom',
+    'snubbull','granbull',
+    'wooper','quagsire',
+    'murkrow',
+    'misdreavus',
+    'unown',
+    'pineco','forretress',
+    'gligar',
+    'steelix',
+    'heracross',
+    'sneasel',
+    'teddiursa',
+    'phanpy',
+    'houndour',
+    'magby',
+    'elekid',
+    'smoochum',
+    'miltank','tauros',
+    'sunkern','sunflora',
+    'yanma',
+    'qwilfish',
+    'shuckle',
+    'corsola',
+    'remoraid','octillery',
+    'mantine',
+    'skarmory',
+    'houndour','houndoom',
+    'stantler',
+    'smeargle',
+    'miltank',
+    'larvitar','pupitar','tyranitar',
+    'wingull','pelipper',
+    'surskit','masquerain',
+    'shroomish','breloom',
+    'makuhita','hariyama',
+    'nosepass',
+    'skitty','delcatty',
+    'mawile',
+    'aron','lairon','aggron',
+    'meditite','medicham',
+    'electrike','manectric',
+    'plusle','minun',
+    'volbeat','illumise',
+    'roselia',
+    'gulpin','swalot',
+    'barboach','whiscash',
+    'corphish','crawdaunt',
+    'baltoy','claydol',
+    'lileep','cradily',
+    'anorith','armaldo',
+    'feebas',
+    'castform',
+    'kecleon',
+    'shuppet','banette',
+    'duskull','dusclops',
+    'tropius',
+    'chimecho',
+    'absol',
+    'wynaut',
+    'snorunt','glalie',
+    'relicanth',
+    'luvdisc',
+    'bagon',
+    'starly','staravia','staraptor',
+    'bidoof','bibarel',
+    'shinx','luxio',
+    'buneary','lopunny',
+    'misdreavus',
+    'drifloon','drifblim',
+    'bronzor',
+    'chatot',
+    'carnivine',
+    'finneon','lumineon',
+    'snover','abomasnow',
+    'rotom',
+    'hippopotas',
+    'croagunk',
+    'mantyke',
+    'deerling',
+    'emolga',
+    'karrablast',
+    'foongus',
+    'frillish',
+    'joltik',
+    'ferroseed',
+    'klink','klang',
+    'elgyem',
+    'litwick',
+    'cubchoo',
+    'cryogonal',
+    'shelmet',
+    'stunfisk',
+    'druddigon',
+    'golett',
+    'pawniard',
+    'rufflet',
+    'vullaby',
+    'heatmor',
+    'durant',
+    'phantump',
+    'pumpkaboo',
+    'bergmite',
+    'noibat',
+    'fletchling',
+    'scatterbug',
+    'litleo',
+    'skiddo',
+    'pancham',
+    'espurr',
+    'spritzee',
+    'swirlix',
+    'inkay',
+    'binacle',
+    'helioptile',
+    'hawlucha',
+    'dedenne',
+    'carbink',
+    'klefki',
+    // Events
+    'audino','buneary','bunnelby','minccino',
+    'petilil','heatmor',
+    'joltik','phantump','pumpkaboo','yamask'
+  );
+
+  // ── UNCOMMON ──
+  set('Uncommon',
+    'metapod','kakuna','butterfree','beedrill',
+    'pidgeotto','pidgeot',
+    'raticate',
+    'fearow',
+    'arbok',
+    'sandslash',
+    'nidorina','nidorina',
+    'golbat','crobat',
+    'weepinbell','victreebel',
+    'graveler','golem',
+    'slowbro',
+    'magneton','magnezone',
+    'persian',
+    'psyduck','golduck',
+    'poliwhirl','poliwrath','politoed',
+    'machoke','machamp',
+    'geodude',
+    'haunter','gengar',
+    'onix','steelix',
+    'kingler',
+    'seaking','goldeen',
+    'seadra','kingdra',
+    'parasect',
+    'hoothoot','noctowl',
+    'ledian','ledyba',
+    'spinarak','ariados',
+    'xatu',
+    'flaaffy',
+    'marill',
+    'sudowoodo',
+    'politoed',
+    'aipom',
+    'sunkern',
+    'wooper',
+    'quagsire',
+    'murkrow',
+    'slowking',
+    'misdreavus',
+    'wobbuffet',
+    'girafarig',
+    'pineco',
+    'gligar',
+    'snubbull',
+    'heracross',
+    'sneasel',
+    'teddiursa',
+    'swinub',
+    'corsola',
+    'remoraid',
+    'mantine',
+    'skarmory',
+    'houndour',
+    'stantler',
+    'smeargle',
+    'tyrogue',
+    'elekid',
+    'magby',
+    'miltank',
+    'sentret','furret',
+    'sandshrew',
+    'meowth',
+    'taillow','swellow',
+    'pelipper',
+    'lombre','ludicolo',
+    'nuzleaf','shiftry',
+    'wingull',
+    'surskit',
+    'poochyena','mightyena',
+    'linoone',
+    'beautifly','dustox',
+    'silcoon','cascoon',
+    'lotad','lombre',
+    'seedot','nuzleaf',
+    'ralts','kirlia','gardevoir',
+    'nincada','ninjask','shedinja',
+    'whismur','loudred','exploud',
+    'skitty',
+    'aron',
+    'plusle','minun',
+    'volbeat','illumise',
+    'gulpin',
+    'corphish',
+    'kecleon',
+    'dwebble','crustle',
+    'shelmet',
+    'deerling',
+    'emolga',
+    'pidove','tranquill','unfezant',
+    'purrloin','liepard',
+    'pansage','simisage',
+    'pansear','simisear',
+    'panpour','simipour',
+    'munna','musharna',
+    'blitzle','zebstrika',
+    'roggenrola','boldore','gigalith',
+    'woobat','swoobat',
+    'tympole','palpitoad','seismitoad',
+    'venipede','whirlipede','scolipede',
+    'cottonee','whimsicott',
+    'petilil','lilligant',
+    'basculin',
+    'sandile','krokorok','krookodile',
+    'darumaka','darmanitan',
+    'maractus',
+    'dwebble',
+    'scraggy','scrafty',
+    'sigilyph',
+    'yamask','cofagrigus',
+    'tirtouga',
+    'archen',
+    'trubbish','garbodor',
+    'zorua','zoroark',
+    'minccino','cinccino',
+    'gothita',
+    'solosis',
+    'ducklett',
+    'vanillite',
+    'karrablast',
+    'foongus',
+    'frillish',
+    'joltik',
+    'ferroseed',
+    'klink',
+    'elgyem',
+    'litwick',
+    'axew',
+    'cubchoo',
+    'shelmet',
+    'stunfisk',
+    'mienfoo',
+    'golett',
+    'pawniard',
+    'bouffalant',
+    'rufflet',
+    'vullaby',
+    'heatmor',
+    'durant',
+    'deino',
+    'larvesta',
+    'yungoos','gumshoos',
+    'grubbin',
+    'oricorio',
+    'cutiefly',
+    'rockruff',
+    'wishiwashi',
+    'mareanie',
+    'mudbray',
+    'dewpider',
+    'fomantis',
+    'morelull',
+    'salandit',
+    'stufful',
+    'bounsweet',
+    'comfey',
+    'wimpod',
+    'sandygast',
+    'pyukumuku',
+    'minior',
+    'komala',
+    'togedemaru',
+    'bruxish',
+    'drampa',
+    'dhelmise',
+    'jangmo-o'
+  );
+
+  // ── COMMON (everything else defaults here) ──
+  // We'll handle "unknown" as Common as a safe default
+
+  return R;
+})();
+
+function getRarity(pokemonName) {
+  const name = pokemonName.toLowerCase();
+  if (RARITY[name]) return RARITY[name];
+  // Try base name (handle forms like rattata-alola)
+  const base = name.split('-')[0];
+  if (RARITY[base]) return RARITY[base];
+  return 'Common';
+}
+
+const RARITY_ORDER = ['Common','Uncommon','Rare','VeryRare','ExtremelyRare','Legendary'];
+const RARITY_LABEL = {
+  'Common':        'Common',
+  'Uncommon':      'Uncommon',
+  'Rare':          'Rare',
+  'VeryRare':      'Very Rare',
+  'ExtremelyRare': 'Extremely Rare',
+  'Legendary':     'Legendary'
+};
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const MAX_DEX = 807;
+let speciesDB  = {};   // id -> { name, displayName, types[], rarity }
+let pokemonList = [];  // [{id, name, displayName}] sorted by id
+let typeMap = {};      // type -> Set<id>
+
+let selectedId = null;
+
+// ═══════════════════════════════════════════════
+//  LOAD DATA
+// ═══════════════════════════════════════════════
+async function loadAllData() {
+  // Fetch all species list (#1-807)
+  const speciesList = await fetch('https://pokeapi.co/api/v2/pokemon-species?limit=807&offset=0')
     .then(r => r.json());
 
-  const [egResults, speciesList] = await Promise.all([
-    Promise.all(eggGroupFetches),
-    speciesListFetch
-  ]);
-
-  // Build eggGroupMap: eggGroup -> Set<speciesId>
-  for (const { key, data } of egResults) {
-    if (!data) continue;
-    const set = new Set();
-    for (const sp of data.pokemon_species) {
-      const id = parseInt(sp.url.split('/').filter(Boolean).pop());
-      if (id >= 1 && id <= MAX_DEX) set.add(id);
-    }
-    eggGroupMap[key] = set;
-  }
-
-  // Build pokemonList from species list
-  // speciesList.results has {name, url}
-  // We need gender_rate and types per species — batch fetch
-  // To keep initial load fast, we only fetch species details on demand (per selection)
-  // But we need at minimum: name + id + egg groups (already have from eggGroupMap)
-  // Build base list
+  // Build basic list
   pokemonList = [];
   for (const sp of speciesList.results) {
     const id = parseInt(sp.url.split('/').filter(Boolean).pop());
     if (id < 1 || id > MAX_DEX) continue;
     const display = toDisplayName(sp.name);
     pokemonList.push({ id, name: sp.name, displayName: display });
-    speciesDB[id] = { name: sp.name, displayName: display, eggGroups: null, genderRate: null, types: [] };
+    speciesDB[id] = {
+      name: sp.name,
+      displayName: display,
+      types: [],
+      rarity: getRarity(sp.name)
+    };
   }
-  // Assign egg groups from eggGroupMap
-  for (const [grp, set] of Object.entries(eggGroupMap)) {
-    for (const id of set) {
-      if (speciesDB[id]) {
-        if (!speciesDB[id].eggGroups) speciesDB[id].eggGroups = [];
-        speciesDB[id].eggGroups.push(grp);
-      }
-    }
-  }
-
-  // Sort by id
   pokemonList.sort((a,b) => a.id - b.id);
 
   document.getElementById('loader').style.display = 'none';
@@ -679,9 +1163,9 @@ function toDisplayName(name) {
   return name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
 //  SEARCH / AUTOCOMPLETE
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
 function initSearch() {
   const input = document.getElementById('pokemon-input');
   const list  = document.getElementById('autocomplete-list');
@@ -692,14 +1176,19 @@ function initSearch() {
     if (!v) return [];
     return pokemonList
       .filter(p => p.name.includes(v) || p.displayName.toLowerCase().includes(v))
-      .slice(0, 10);
+      .slice(0, 12);
+  }
+
+  function rarityPillHtml(rarity) {
+    return `<span class="rarity-pill rarity-${rarity}">${RARITY_LABEL[rarity]}</span>`;
   }
 
   function renderSuggestions(items) {
     list.innerHTML = '';
     activeIdx = -1;
     if (!items.length) { list.classList.remove('open'); return; }
-    items.forEach((item, i) => {
+    items.forEach((item) => {
+      const rarity = speciesDB[item.id]?.rarity || 'Common';
       const div = document.createElement('div');
       div.className = 'autocomplete-item';
       div.innerHTML = `
@@ -707,6 +1196,7 @@ function initSearch() {
              alt="${item.displayName}" onerror="this.style.display='none'" />
         <span>${item.displayName}</span>
         <span class="dex-num">#${String(item.id).padStart(3,'0')}</span>
+        ${rarityPillHtml(rarity)}
       `;
       div.addEventListener('mousedown', () => selectPokemon(item));
       list.appendChild(div);
@@ -714,10 +1204,7 @@ function initSearch() {
     list.classList.add('open');
   }
 
-  input.addEventListener('input', () => {
-    renderSuggestions(getSuggestions(input.value));
-  });
-
+  input.addEventListener('input', () => renderSuggestions(getSuggestions(input.value)));
   input.addEventListener('keydown', e => {
     const items = list.querySelectorAll('.autocomplete-item');
     if (e.key === 'ArrowDown') {
@@ -735,110 +1222,37 @@ function initSearch() {
       list.classList.remove('open');
     }
   });
-
-  input.addEventListener('blur', () => {
-    setTimeout(() => list.classList.remove('open'), 150);
-  });
-  input.addEventListener('focus', () => {
-    if (input.value) renderSuggestions(getSuggestions(input.value));
-  });
-
-  // Gender buttons
-  document.querySelectorAll('.gender-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      selectedGender = btn.dataset.gender;
-      if (selectedId) showResults();
-    });
-  });
+  input.addEventListener('blur',  () => setTimeout(() => list.classList.remove('open'), 150));
+  input.addEventListener('focus', () => { if (input.value) renderSuggestions(getSuggestions(input.value)); });
 }
 
 async function selectPokemon(item) {
   selectedId = item.id;
-  const input = document.getElementById('pokemon-input');
-  input.value = item.displayName;
+  document.getElementById('pokemon-input').value = item.displayName;
   document.getElementById('autocomplete-list').classList.remove('open');
 
-  // Show sprite in input
   const preview = document.getElementById('sprite-preview');
   preview.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.id}.png`;
   preview.style.display = 'block';
 
-  // Fetch species details if not yet loaded
-  await ensureSpeciesLoaded(item.id);
-  updateGenderUI(item.id);
-
-  if (selectedGender || speciesDB[item.id].genderRate === -1 || speciesDB[item.id].genderRate === 0 || speciesDB[item.id].genderRate === 8) {
-    showResults();
-  } else {
-    // Auto-select gender based on availability
-    const sp = speciesDB[item.id];
-    if (sp.genderRate === 0) selectGenderUI('male');
-    else if (sp.genderRate === 8) selectGenderUI('female');
-    else showResults();
-  }
+  await ensureTypesLoaded(item.id);
+  showResults();
 }
 
-function selectGenderUI(gender) {
-  selectedGender = gender;
-  document.querySelectorAll('.gender-btn').forEach(b => {
-    b.classList.toggle('selected', b.dataset.gender === gender);
-  });
-}
-
-function updateGenderUI(id) {
+async function ensureTypesLoaded(id) {
   const sp = speciesDB[id];
-  const btns = document.getElementById('gender-btns');
-  const maleBtn   = btns.querySelector('[data-gender="male"]');
-  const femaleBtn = btns.querySelector('[data-gender="female"]');
-
-  // genderRate: -1 = genderless, 0 = always male, 8 = always female, else both
-  if (sp.genderRate === -1) {
-    // Genderless
-    maleBtn.classList.add('disabled');
-    femaleBtn.classList.add('disabled');
-    maleBtn.classList.remove('selected');
-    femaleBtn.classList.remove('selected');
-    selectedGender = 'genderless';
-  } else if (sp.genderRate === 0) {
-    // Always male
-    femaleBtn.classList.add('disabled');
-    femaleBtn.classList.remove('selected');
-    maleBtn.classList.remove('disabled');
-    selectGenderUI('male');
-  } else if (sp.genderRate === 8) {
-    // Always female
-    maleBtn.classList.add('disabled');
-    maleBtn.classList.remove('selected');
-    femaleBtn.classList.remove('disabled');
-    selectGenderUI('female');
-  } else {
-    maleBtn.classList.remove('disabled');
-    femaleBtn.classList.remove('disabled');
-    if (!selectedGender) selectGenderUI('male');
-  }
-}
-
-async function ensureSpeciesLoaded(id) {
-  const sp = speciesDB[id];
-  if (sp.genderRate !== null) return; // already loaded
+  if (sp.types.length) return;
   try {
-    const [speciesData, pokeData] = await Promise.all([
-      fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}/`).then(r => r.json()),
-      fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`).then(r => r.json())
-    ]);
-    sp.genderRate = speciesData.gender_rate;
-    sp.types = pokeData.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1));
+    const data = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`).then(r => r.json());
+    sp.types = data.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1));
   } catch(e) {
-    sp.genderRate = -2; // unknown
     sp.types = [];
   }
 }
 
-// ─────────────────────────────────────────────
-//  RESULTS DISPLAY
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+//  RESULTS
+// ═══════════════════════════════════════════════
 async function showResults() {
   const resultsEl = document.getElementById('results');
   const divider   = document.getElementById('results-divider');
@@ -847,82 +1261,33 @@ async function showResults() {
   divider.style.display = 'block';
 
   const sp = speciesDB[selectedId];
-  if (!sp) return;
 
-  // Genderless: only Ditto
-  if (sp.genderRate === -1) {
-    resultsEl.innerHTML = renderGenderlessResult(sp);
-    return;
-  }
-
-  // Undiscovered: cannot breed
-  if (sp.eggGroups && sp.eggGroups.includes('no-eggs')) {
-    resultsEl.innerHTML = renderCannotBreed(sp);
-    return;
-  }
-
-  // Normal breeding: find all compatible pokemon
-  const compatibleGroups = (sp.eggGroups || []).filter(g => g !== 'ditto' && g !== 'no-eggs');
-  if (!compatibleGroups.length) {
-    resultsEl.innerHTML = renderCannotBreed(sp);
-    return;
-  }
-
-  // Show loading
-  resultsEl.innerHTML = `
-    <div class="selected-info">
-      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png"
-           class="selected-sprite" alt="${sp.displayName}" />
-      <div>
-        <div class="selected-name">${sp.displayName} <span style="font-size:9px;color:rgba(255,255,255,0.7)">#${String(selectedId).padStart(3,'0')}</span></div>
-        <div class="selected-meta">
-          ${(sp.types||[]).map(t => `<span class="type-badge type-${t}">${t}</span>`).join('')}
-          &nbsp;·&nbsp; ${compatibleGroups.map(g => EGG_GROUP_DISPLAY[g]?.name || g).join(' / ')} Group${compatibleGroups.length > 1 ? 's' : ''}
-          &nbsp;·&nbsp; ${renderGenderLabel()}
-        </div>
-      </div>
-    </div>
-    <div class="results-loading">
-      <div class="loader-ball"></div>
-    </div>
+  // Show loading state with selected info
+  resultsEl.innerHTML = selectedInfoHtml(sp) + `
+    <div class="results-loading"><div class="loader-ball"></div></div>
   `;
 
-  // Collect all compatible pokemon grouped by egg group
-  const grouped = {}; // eggGroup -> [{id, name, displayName}]
+  const myRarity = sp.rarity;
+  const myTypes  = sp.types; // already loaded
 
-  for (const grp of compatibleGroups) {
-    const members = [];
-    const ids = eggGroupMap[grp] || new Set();
-    for (const pid of ids) {
-      if (pid === selectedId) continue; // skip self (unless you want to include)
-      const psp = speciesDB[pid];
-      if (!psp) continue;
-      // For female selected or genderless-adjacent: exclude always-male-only from female perspective
-      // Actually: as long as they can produce eggs together (opposite gender or Ditto), include them
-      // Simplified: include everyone in same egg group — gender filtering is done at nursery level
-      members.push({ id: pid, name: psp.name, displayName: psp.displayName });
-    }
-    members.sort((a,b) => a.id - b.id);
-    grouped[grp] = members;
-  }
+  // Find all pokemon sharing same rarity AND at least one type
+  // We need to batch-load types for all same-rarity pokemon we don't have yet
+  const sameRarity = pokemonList.filter(p => {
+    const psp = speciesDB[p.id];
+    return p.id !== selectedId && psp && psp.rarity === myRarity;
+  });
 
-  // Collect all unique pokemon ids we'll need types for
-  const allMemberIds = new Set();
-  for (const grp of compatibleGroups) {
-    for (const m of grouped[grp]) allMemberIds.add(m.id);
-  }
-
-  // Batch-load types for all members (concurrently, up to ~50 at once)
-  const idsToLoad = [...allMemberIds].filter(id => !speciesDB[id]?.types?.length);
+  // Batch load types for same-rarity pokemon (40 at a time)
+  const needTypes = sameRarity.filter(p => !speciesDB[p.id].types.length);
   const BATCH = 40;
-  for (let i = 0; i < idsToLoad.length; i += BATCH) {
-    const chunk = idsToLoad.slice(i, i + BATCH);
-    await Promise.allSettled(chunk.map(id =>
-      fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`)
+  for (let i = 0; i < needTypes.length; i += BATCH) {
+    const chunk = needTypes.slice(i, i + BATCH);
+    await Promise.allSettled(chunk.map(p =>
+      fetch(`https://pokeapi.co/api/v2/pokemon/${p.id}/`)
         .then(r => r.json())
         .then(d => {
-          if (speciesDB[id]) {
-            speciesDB[id].types = d.types.map(t =>
+          if (speciesDB[p.id]) {
+            speciesDB[p.id].types = d.types.map(t =>
               t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)
             );
           }
@@ -931,47 +1296,65 @@ async function showResults() {
     ));
   }
 
-  // Render
-  let html = `
-    <div class="selected-info">
-      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png"
-           class="selected-sprite" alt="${sp.displayName}" />
-      <div>
-        <div class="selected-name">${sp.displayName} <span style="font-size:9px;color:rgba(255,255,255,0.7)">#${String(selectedId).padStart(3,'0')}</span></div>
-        <div class="selected-meta">
-          ${(sp.types||[]).map(t => `<span class="type-badge type-${t}">${t}</span>`).join('')}
-          &nbsp;·&nbsp; ${compatibleGroups.map(g => EGG_GROUP_DISPLAY[g]?.name || g).join(' / ')} Group${compatibleGroups.length > 1 ? 's' : ''}
-          &nbsp;·&nbsp; ${renderGenderLabel()}
-        </div>
-      </div>
-    </div>
-  `;
-
-  for (const grp of compatibleGroups) {
-    const members = grouped[grp];
-    const info = EGG_GROUP_DISPLAY[grp] || { name: grp, icon: '⭕', cls: 'egg-Field' };
-    html += `
-      <div class="egg-group-section">
-        <div class="egg-group-header ${info.cls}">
-          <span class="egg-group-icon">${info.icon}</span>
-          ${info.name} Egg Group
-          <span class="pokemon-count">${members.length} Pokémon</span>
-        </div>
-        <div class="pokemon-grid">
-          ${members.map(m => renderPokemonCard(m)).join('')}
-        </div>
-      </div>
-    `;
+  // Now filter by shared type
+  // Group by shared type(s)
+  const typeGroups = {}; // type -> [pokemon]
+  for (const p of sameRarity) {
+    const psp = speciesDB[p.id];
+    if (!psp || !psp.types.length) continue;
+    const sharedTypes = myTypes.filter(t => psp.types.includes(t));
+    for (const t of sharedTypes) {
+      if (!typeGroups[t]) typeGroups[t] = [];
+      typeGroups[t].push(p);
+    }
   }
 
-  // Ditto section always at the bottom
+  // Sort each group by dex id
+  for (const t of Object.keys(typeGroups)) {
+    typeGroups[t].sort((a,b) => a.id - b.id);
+  }
+
+  // Sort type keys by the selected pokemon's type order (primary type first)
+  const sortedTypes = myTypes.filter(t => typeGroups[t] && typeGroups[t].length > 0);
+
+  // Render
+  let html = selectedInfoHtml(sp);
+
+  if (sortedTypes.length === 0) {
+    html += `
+      <div class="no-results">
+        <div class="icon">🔍</div>
+        <h3>No compatible Pokémon found</h3>
+        <p>No other <strong>${RARITY_LABEL[myRarity]}</strong> Pokémon share a type with <strong>${sp.displayName}</strong>.<br/>
+        Ditto can still breed with any Pokémon regardless of type or rarity.</p>
+      </div>
+    `;
+  } else {
+    for (const type of sortedTypes) {
+      const members = typeGroups[type];
+      html += `
+        <div class="type-group-section">
+          <div class="type-group-header th-${type}">
+            <span class="type-badge type-${type}">${type}</span>
+            Compatible Pokémon
+            <span class="type-count">${members.length}</span>
+          </div>
+          <div class="pokemon-grid">
+            ${members.map(m => renderPokemonCard(m)).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Ditto always at bottom
   html += `
     <div class="ditto-section">
       <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png" alt="Ditto" />
       <div>
         <h4>🔮 Ditto — Always Compatible</h4>
-        <p>Ditto can breed with <strong>${sp.displayName}</strong> regardless of egg group or gender.<br/>
-        The egg produced will always be a <strong>${sp.displayName}</strong> (or its earliest non-baby form).</p>
+        <p>Ditto ignores type and rarity rules and can breed with <strong>${sp.displayName}</strong> regardless.<br/>
+        The egg produced will always be a <strong>${sp.displayName}</strong> (female parent determines the egg species).</p>
       </div>
     </div>
   `;
@@ -979,52 +1362,22 @@ async function showResults() {
   resultsEl.innerHTML = html;
 }
 
-function renderGenderLabel() {
-  if (selectedGender === 'male')     return '♂ Male selected';
-  if (selectedGender === 'female')   return '♀ Female selected';
-  if (selectedGender === 'genderless') return '⚪ Genderless';
-  return '';
-}
-
-function renderGenderlessResult(sp) {
+function selectedInfoHtml(sp) {
+  const rarityClass = `rarity-${sp.rarity}`;
+  const typeHtml = (sp.types||[]).map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
   return `
     <div class="selected-info">
       <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png"
            class="selected-sprite" alt="${sp.displayName}" />
       <div>
-        <div class="selected-name">${sp.displayName} <span style="font-size:9px;color:rgba(255,255,255,0.7)">#${String(selectedId).padStart(3,'0')}</span></div>
-        <div class="selected-meta">⚪ Genderless Pokémon</div>
+        <div class="selected-name">${sp.displayName}
+          <span style="font-size:9px;color:rgba(255,255,255,0.6)"> #${String(selectedId).padStart(3,'0')}</span>
+        </div>
+        <div class="selected-meta">
+          ${typeHtml}
+          <span class="rarity-tag ${rarityClass}">${RARITY_LABEL[sp.rarity]}</span>
+        </div>
       </div>
-    </div>
-    <div style="background:#f5f0ff;border:2px solid #c090e0;border-radius:14px;padding:20px 24px;margin-top:4px;">
-      <p style="font-weight:700;color:#6020a0;font-size:14px;">⚪ Genderless — Only compatible with Ditto</p>
-      <p style="margin-top:8px;font-size:13px;color:#503070;">Genderless Pokémon cannot breed with other members of their egg group. The only valid breeding partner is Ditto.</p>
-    </div>
-    <div class="ditto-section" style="margin-top:16px;">
-      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png" alt="Ditto" />
-      <div>
-        <h4>🔮 Ditto — Only Breeding Partner</h4>
-        <p>Leave <strong>${sp.displayName}</strong> + Ditto at the Pokémon Nursery to receive a <strong>${sp.displayName}</strong> egg.</p>
-      </div>
-    </div>
-  `;
-}
-
-function renderCannotBreed(sp) {
-  return `
-    <div class="selected-info">
-      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png"
-           class="selected-sprite" alt="${sp.displayName}" />
-      <div>
-        <div class="selected-name">${sp.displayName} <span style="font-size:9px;color:rgba(255,255,255,0.7)">#${String(selectedId).padStart(3,'0')}</span></div>
-        <div class="selected-meta">Undiscovered Egg Group</div>
-      </div>
-    </div>
-    <div class="cannot-breed">
-      <div class="icon">🚫</div>
-      <h3>Cannot Breed</h3>
-      <p>${sp.displayName} is in the <strong>Undiscovered</strong> egg group and cannot breed with any Pokémon, including Ditto.<br/><br/>
-      This applies to most Legendary and Mythical Pokémon, baby Pokémon, Ultra Beasts, and certain special forms.</p>
     </div>
   `;
 }
@@ -1032,27 +1385,28 @@ function renderCannotBreed(sp) {
 function renderPokemonCard(m) {
   const sp = speciesDB[m.id];
   const types = sp?.types || [];
+  const rarity = sp?.rarity || 'Common';
   const typeHtml = types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
   return `
     <div class="pokemon-card">
       <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${m.id}.png"
            alt="${m.displayName}" loading="lazy"
-           onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'" />
+           onerror="this.src=''" />
       <span class="pname">${m.displayName}</span>
       <span class="pdex">#${String(m.id).padStart(3,'0')}</span>
       ${typeHtml ? `<div class="ptypes">${typeHtml}</div>` : ''}
+      <span class="prarity ${`rarity-${rarity}`}">${RARITY_LABEL[rarity]}</span>
     </div>
   `;
 }
 
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
 //  INIT
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
 loadAllData().catch(err => {
   document.getElementById('loader').innerHTML = `
-    <div class="error-box">
-      ⚠️ Failed to load Pokédex data. Please check your internet connection and refresh.
-      <br/><small>${err.message}</small>
+    <div style="background:#fff5f5;border:2px solid #fca5a5;border-radius:10px;padding:16px;color:#dc2626;font-weight:700;font-size:13px;">
+      ⚠️ Failed to load Pokédex data. Check your connection and refresh.<br/><small>${err.message}</small>
     </div>
   `;
 });

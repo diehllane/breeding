@@ -1,28 +1,33 @@
-# Pokémon Breeding Chart — USUM Gen 7
+# PokeNexus Breeding Compatibility Chart — Godot Edition
 
-A fan-made breeding compatibility tool for Pokémon Ultra Sun & Ultra Moon (Generation VII, National Dex #1–807).
+A fan-made breeding compatibility tool for PokeNexus (PNO), based on the game's custom breeding rules rather than standard Pokémon egg groups.
+
+## Breeding Rules (PokeNexus / Godot)
+
+- Two Pokémon can breed if they **share at least one type** AND have the **same rarity**
+- Rarity tiers (lowest → highest): Common, Uncommon, Rare, Very Rare, Extremely Rare, Legendary
+- **Ditto** is the universal exception — it can breed with any Pokémon regardless of type or rarity
+- The female parent determines which species the egg will be
 
 ## Features
-- Search all 807 Gen 7 Pokémon with autocomplete
-- Gender-aware results (genderless Pokémon locked to Ditto-only)
-- Undiscovered/Legendary Pokémon show "Cannot Breed" message
-- Results grouped by egg group
-- Ditto always shown at the bottom as a universal breeding option
-- Live data from PokéAPI (no backend required)
+
+- Search all 807 Gen 7 Pokémon with live autocomplete
+- Results grouped by shared type
+- Rarity shown on every Pokémon card
+- Ditto always shown at the bottom as a universal option
+- Live type data from PokéAPI; rarity data sourced from the PokeNexus game guide
 
 ## Deployment (GitHub Pages)
 
 1. Create a new GitHub repository
-2. Upload all files in this folder to the repo root
-3. Go to Settings → Pages → Source: Deploy from branch → `main` → `/root`
-4. Your site will be live at `https://<username>.github.io/<repo-name>/`
+2. Upload `index.html` to the repo root
+3. Settings → Pages → Source: `main` branch, `/ (root)`
+4. Live at `https://<username>.github.io/<repo-name>/`
 
-## Files
-- `index.html` — the full single-file app
-- `Pokemon-11.png` — Professor Oak sprite
-- `Pokemon-14.png` — Pokémon logo
-- `Whisk_1b5221c4ebf0404bd46447faa0660c91dr-gigapixel.png` — Pikachu sprite
+Only one file needed — no images, no build step.
 
 ## Data Sources
-- Egg group, species, and gender data: [PokéAPI](https://pokeapi.co)
+
+- Types: [PokéAPI](https://pokeapi.co)
 - Sprites: [PokeAPI Sprites](https://github.com/PokeAPI/sprites)
+- Rarity: PokeNexus official game guide
