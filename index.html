@@ -1503,7 +1503,7 @@ async function ensureTypesLoaded(id) {
   if (sp.types.length) return;
   try {
     const data = await fetchWithTimeout(`https://pokeapi.co/api/v2/pokemon/${id}/`, 10000);
-    sp.types = data.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1));
+    sp.types = data.types.map(t => t.type.name.toLowerCase());
   } catch(e) {
     sp.types = [];
   }
@@ -1558,9 +1558,7 @@ async function showResults() {
         .then(r => r.json())
         .then(d => {
           if (speciesDB[p.id]) {
-            speciesDB[p.id].types = d.types.map(t =>
-              t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)
-            );
+            speciesDB[p.id].types = d.types.map(t => t.type.name.toLowerCase());
           }
         })
         .catch(() => {})
@@ -1606,7 +1604,7 @@ async function showResults() {
       html += `
         <div class="type-group-section">
           <div class="type-group-header th-${type}">
-            <span class="type-badge type-${type}">${type}</span>
+            <span class="type-badge type-${type}">${type.charAt(0).toUpperCase()+type.slice(1)}</span>
             Compatible Pokémon
             <span class="type-count">${members.length}</span>
           </div>
@@ -1635,7 +1633,7 @@ async function showResults() {
 
 function selectedInfoHtml(sp) {
   const rarityClass = `rarity-${sp.rarity}`;
-  const typeHtml = (sp.types||[]).map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
+  const typeHtml = (sp.types||[]).map(t => `<span class="type-badge type-${t}">${t.charAt(0).toUpperCase()+t.slice(1)}</span>`).join('');
   return `
     <div class="selected-info">
       <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png"
