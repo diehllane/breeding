@@ -1634,13 +1634,17 @@ async function showResults() {
 function selectedInfoHtml(sp) {
   const rarityClass = `rarity-${sp.rarity}`;
   const typeHtml = (sp.types||[]).map(t => `<span class="type-badge type-${t}">${t.charAt(0).toUpperCase()+t.slice(1)}</span>`).join('');
+  const spriteUrl = Number.isInteger(selectedId)
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png`
+    : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${sp.name}.png`;
+  const dexLabel = Number.isInteger(selectedId) ? `#${String(selectedId).padStart(3,'0')}` : sp.displayName.split('-').slice(1).join('-');
   return `
     <div class="selected-info">
-      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png"
+      <img src="${spriteUrl}"
            class="selected-sprite" alt="${sp.displayName}" />
       <div>
         <div class="selected-name">${sp.displayName}
-          <span style="font-size:9px;color:rgba(255,255,255,0.6)"> #${String(selectedId).padStart(3,'0')}</span>
+          <span style="font-size:9px;color:rgba(255,255,255,0.6)"> ${dexLabel}</span></span>
         </div>
         <div class="selected-meta">
           ${typeHtml}
@@ -1655,14 +1659,19 @@ function renderPokemonCard(m) {
   const sp = speciesDB[m.id];
   const types = sp?.types || [];
   const rarity = sp?.rarity || 'Common';
-  const typeHtml = types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
+  const typeHtml = types.map(t => `<span class="type-badge type-${t}">${t.charAt(0).toUpperCase()+t.slice(1)}</span>`).join('');
+  // For alternate forms (non-integer IDs), use name-based sprite URL
+  const spriteUrl = Number.isInteger(m.id)
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${m.id}.png`
+    : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${m.name}.png`;
+  const dexLabel = Number.isInteger(m.id) ? `#${String(m.id).padStart(3,'0')}` : m.displayName.split('-').slice(1).join('-');
   return `
     <div class="pokemon-card">
-      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${m.id}.png"
+      <img src="${spriteUrl}"
            alt="${m.displayName}" loading="lazy"
            onerror="this.src=''" />
       <span class="pname">${m.displayName}</span>
-      <span class="pdex">#${String(m.id).padStart(3,'0')}</span>
+      <span class="pdex">${dexLabel}</span>
       ${typeHtml ? `<div class="ptypes">${typeHtml}</div>` : ''}
       <span class="prarity ${`rarity-${rarity}`}">${RARITY_LABEL[rarity]}</span>
     </div>
