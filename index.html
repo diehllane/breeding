@@ -1390,6 +1390,29 @@ async function loadAllData() {
   }
   pokemonList.sort((a,b) => a.id - b.id);
 
+  // ── Custom variant forms (hardcoded types, not in PokeAPI base list) ──
+  const CUSTOM_VARIANTS = [
+    // Rotom forms — all VeryRare
+    { id: 479.1, name: 'rotom-heat',  displayName: 'Rotom-Heat',  types: ['electric','fire'],    rarity: 'VeryRare' },
+    { id: 479.2, name: 'rotom-wash',  displayName: 'Rotom-Wash',  types: ['electric','water'],   rarity: 'VeryRare' },
+    { id: 479.3, name: 'rotom-frost', displayName: 'Rotom-Frost', types: ['electric','ice'],     rarity: 'VeryRare' },
+    { id: 479.4, name: 'rotom-fan',   displayName: 'Rotom-Fan',   types: ['electric','flying'],  rarity: 'VeryRare' },
+    { id: 479.5, name: 'rotom-mow',   displayName: 'Rotom-Mow',   types: ['electric','grass'],   rarity: 'VeryRare' },
+    // Oricorio variants — all Rare
+    { id: 741.1, name: 'oricorio-pau',    displayName: "Oricorio-Pa\'u",    types: ['psychic','flying'],  rarity: 'Rare' },
+    { id: 741.2, name: 'oricorio-pompom', displayName: 'Oricorio-Pom-Pom',  types: ['electric','flying'], rarity: 'Rare' },
+    { id: 741.3, name: 'oricorio-sensu',  displayName: 'Oricorio-Sensu',    types: ['ghost','flying'],    rarity: 'Rare' },
+  ];
+  for (const v of CUSTOM_VARIANTS) {
+    pokemonList.push(v);
+    speciesDB[v.id] = v;
+    for (const t of v.types) {
+      if (!typeMap[t]) typeMap[t] = new Set();
+      typeMap[t].add(v.id);
+    }
+    RARITY_DATA[v.name] = v.rarity;
+  }
+
   document.getElementById('loader').style.display = 'none';
   document.getElementById('search-section').classList.add('visible');
   initSearch();
@@ -1505,6 +1528,18 @@ async function showResults() {
 
   const myRarity = sp.rarity;
   const myTypes  = sp.types; // already loaded
+
+  // Legendary pokemon cannot breed
+  if (myRarity === 'Legendary') {
+    resultsEl.innerHTML = selectedInfoHtml(sp) + `
+      <div class="no-results">
+        <div class="icon">🚫</div>
+        <h3>Cannot Breed</h3>
+        <p><strong>${sp.displayName}</strong> is a Legendary Pokémon and cannot breed with any Pokémon, including Ditto.</p>
+      </div>
+    `;
+    return;
+  }
 
   // Find all pokemon sharing same rarity AND at least one type
   // We need to batch-load types for all same-rarity pokemon we don't have yet
