@@ -1547,6 +1547,19 @@ async function ensureTypesLoaded(id) {
 // ═══════════════════════════════════════════════
 //  RESULTS
 // ═══════════════════════════════════════════════
+function dittoSectionHtml(sp) {
+  return `
+    <div class="ditto-section">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png" alt="Ditto" />
+      <div>
+        <h4>🔮 Ditto — Always Compatible</h4>
+        <p>Ditto ignores type and rarity rules and can breed with <strong>${sp.displayName}</strong> regardless.<br/>
+        The egg produced will always be a <strong>${sp.displayName}</strong> (female parent determines the egg species).</p>
+      </div>
+    </div>
+  `;
+}
+
 async function showResults() {
   const resultsEl = document.getElementById('results');
   const divider   = document.getElementById('results-divider');
@@ -1576,18 +1589,19 @@ async function showResults() {
     return;
   }
 
-  // Genderless pokemon — same species only, no Ditto
+  // Genderless pokemon — same species only; Ditto OK if VeryRare or lower
   if (GENDERLESS.has(sp.name)) {
     const sameSpecies = pokemonList.filter(p => p.id !== selectedId && p.name === sp.name);
+    const dittoOk = RARITY_ORDER.indexOf(myRarity) <= RARITY_ORDER.indexOf(DITTO_MAX_RARITY);
     let html = selectedInfoHtml(sp);
     html += `
       <div class="no-results" style="background:#f0f4ff;border-color:#99b;color:#445;">
         <div class="icon">⚧</div>
         <h3>Genderless — Same Species Only</h3>
-        <p><strong>${sp.displayName}</strong> is genderless and can only breed with another <strong>${sp.displayName}</strong>.<br/>
-        Ditto cannot breed with genderless Pokémon.</p>
+        <p><strong>${sp.displayName}</strong> is genderless and can only breed with another <strong>${sp.displayName}</strong>${dittoOk ? ' or with Ditto' : ''}.${dittoOk ? '' : '<br/>Ditto cannot breed with this Pokémon.'}</p>
       </div>
     `;
+    if (dittoOk) html += dittoSectionHtml(sp);
     resultsEl.innerHTML = html;
     return;
   }
@@ -1669,16 +1683,7 @@ async function showResults() {
 
   // Ditto at bottom — only for VeryRare or lower
   if (RARITY_ORDER.indexOf(myRarity) <= RARITY_ORDER.indexOf(DITTO_MAX_RARITY)) {
-    html += `
-      <div class="ditto-section">
-        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png" alt="Ditto" />
-        <div>
-          <h4>🔮 Ditto — Always Compatible</h4>
-          <p>Ditto ignores type and rarity rules and can breed with <strong>${sp.displayName}</strong> regardless.<br/>
-          The egg produced will always be a <strong>${sp.displayName}</strong> (female parent determines the egg species).</p>
-        </div>
-      </div>
-    `;
+    html += dittoSectionHtml(sp);
   }
 
   resultsEl.innerHTML = html;
