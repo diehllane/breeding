@@ -1630,7 +1630,7 @@ async function showResults() {
   // We need to batch-load types for all same-rarity pokemon we don't have yet
   const sameRarity = pokemonList.filter(p => {
     const psp = speciesDB[p.id];
-    return p.id !== selectedId && psp && psp.rarity === myRarity;
+    return p.id !== selectedId && psp && psp.rarity === myRarity && !GENDERLESS.has(psp.name);
   });
 
   // Batch load types for same-rarity pokemon (40 at a time)
