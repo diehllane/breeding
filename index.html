@@ -1338,7 +1338,7 @@ function getRarity(pokemonName) {
 }
 const RARITY_ORDER = ['Common','Uncommon','Rare','VeryRare','ExtremelyRare','Legendary'];
 
-// Genderless pokemon — breed with same species only, no Ditto
+// Genderless pokemon — breed with same species only; Ditto OK if VeryRare or lower
 const GENDERLESS = new Set([
   // Gen 1
   'magnemite','magneton','magnezone',
@@ -1355,7 +1355,6 @@ const GENDERLESS = new Set([
   'bronzor','bronzong',
   // Gen 4
   'rotom','rotom-heat','rotom-wash','rotom-frost','rotom-fan','rotom-mow',
-  'porygon-z',
   // Gen 5
   'klink','klang','klinklang',
   'cryogonal',
@@ -1426,17 +1425,38 @@ async function loadAllData() {
   pokemonList.sort((a,b) => a.id - b.id);
 
   // ── Custom variant forms (hardcoded types, not in PokeAPI base list) ──
+  // Sprite URL pattern for named forms: sprites/pokemon/[form-id].png where known,
+  // or official-artwork by name. PokeAPI form IDs for Alolans start at 10001+.
   const CUSTOM_VARIANTS = [
-    // Rotom forms — all VeryRare
-    { id: 479.1, name: 'rotom-heat',  displayName: 'Rotom-Heat',  types: ['electric','fire'],    rarity: 'VeryRare' },
-    { id: 479.2, name: 'rotom-wash',  displayName: 'Rotom-Wash',  types: ['electric','water'],   rarity: 'VeryRare' },
-    { id: 479.3, name: 'rotom-frost', displayName: 'Rotom-Frost', types: ['electric','ice'],     rarity: 'VeryRare' },
-    { id: 479.4, name: 'rotom-fan',   displayName: 'Rotom-Fan',   types: ['electric','flying'],  rarity: 'VeryRare' },
-    { id: 479.5, name: 'rotom-mow',   displayName: 'Rotom-Mow',   types: ['electric','grass'],   rarity: 'VeryRare' },
-    // Oricorio variants — all Rare
-    { id: 741.1, name: 'oricorio-pau',    displayName: "Oricorio-Pa\'u",    types: ['psychic','flying'],  rarity: 'Rare' },
-    { id: 741.2, name: 'oricorio-pompom', displayName: 'Oricorio-Pom-Pom',  types: ['electric','flying'], rarity: 'Rare' },
-    { id: 741.3, name: 'oricorio-sensu',  displayName: 'Oricorio-Sensu',    types: ['ghost','flying'],    rarity: 'Rare' },
+    // ── Rotom forms — VeryRare, Electric + secondary type ──
+    { id: 10008, name: 'rotom-heat',  displayName: 'Rotom-Heat',  types: ['electric','fire'],    rarity: 'VeryRare' },
+    { id: 10009, name: 'rotom-wash',  displayName: 'Rotom-Wash',  types: ['electric','water'],   rarity: 'VeryRare' },
+    { id: 10010, name: 'rotom-frost', displayName: 'Rotom-Frost', types: ['electric','ice'],     rarity: 'VeryRare' },
+    { id: 10011, name: 'rotom-fan',   displayName: 'Rotom-Fan',   types: ['electric','flying'],  rarity: 'VeryRare' },
+    { id: 10012, name: 'rotom-mow',   displayName: 'Rotom-Mow',   types: ['electric','grass'],   rarity: 'VeryRare' },
+    // ── Oricorio variants — Rare, Flying + secondary type ──
+    { id: 10052, name: 'oricorio-pau',    displayName: "Oricorio-Pa'u",   types: ['psychic','flying'],  rarity: 'Rare' },
+    { id: 10053, name: 'oricorio-pompom', displayName: 'Oricorio-Pom-Pom', types: ['electric','flying'], rarity: 'Rare' },
+    { id: 10054, name: 'oricorio-sensu',  displayName: 'Oricorio-Sensu',   types: ['ghost','flying'],    rarity: 'Rare' },
+    // ── Alolan forms ──
+    { id: 10100, name: 'rattata-alola',   displayName: 'Rattata-Alola',   types: ['dark','normal'],     rarity: 'Common' },
+    { id: 10101, name: 'raticate-alola',  displayName: 'Raticate-Alola',  types: ['dark','normal'],     rarity: 'Common' },
+    { id: 10102, name: 'raichu-alola',    displayName: 'Raichu-Alola',    types: ['electric','psychic'], rarity: 'VeryRare' },
+    { id: 10103, name: 'sandshrew-alola', displayName: 'Sandshrew-Alola', types: ['ice','steel'],       rarity: 'Uncommon' },
+    { id: 10104, name: 'sandslash-alola', displayName: 'Sandslash-Alola', types: ['ice','steel'],       rarity: 'Uncommon' },
+    { id: 10105, name: 'vulpix-alola',    displayName: 'Vulpix-Alola',    types: ['ice'],               rarity: 'VeryRare' },
+    { id: 10106, name: 'ninetales-alola', displayName: 'Ninetales-Alola', types: ['ice','fairy'],       rarity: 'VeryRare' },
+    { id: 10107, name: 'diglett-alola',   displayName: 'Diglett-Alola',   types: ['ground','steel'],    rarity: 'Common' },
+    { id: 10108, name: 'dugtrio-alola',   displayName: 'Dugtrio-Alola',   types: ['ground','steel'],    rarity: 'Common' },
+    { id: 10109, name: 'meowth-alola',    displayName: 'Meowth-Alola',    types: ['dark'],              rarity: 'Uncommon' },
+    { id: 10110, name: 'persian-alola',   displayName: 'Persian-Alola',   types: ['dark'],              rarity: 'Uncommon' },
+    { id: 10111, name: 'geodude-alola',   displayName: 'Geodude-Alola',   types: ['rock','electric'],   rarity: 'Common' },
+    { id: 10112, name: 'graveler-alola',  displayName: 'Graveler-Alola',  types: ['rock','electric'],   rarity: 'Common' },
+    { id: 10113, name: 'golem-alola',     displayName: 'Golem-Alola',     types: ['rock','electric'],   rarity: 'Common' },
+    { id: 10114, name: 'grimer-alola',    displayName: 'Grimer-Alola',    types: ['poison','dark'],     rarity: 'Rare' },
+    { id: 10115, name: 'muk-alola',       displayName: 'Muk-Alola',       types: ['poison','dark'],     rarity: 'Rare' },
+    { id: 10116, name: 'exeggutor-alola', displayName: 'Exeggutor-Alola', types: ['grass','dragon'],    rarity: 'VeryRare' },
+    { id: 10117, name: 'marowak-alola',   displayName: 'Marowak-Alola',   types: ['fire','ghost'],      rarity: 'VeryRare' },
   ];
   for (const v of CUSTOM_VARIANTS) {
     pokemonList.push(v);
@@ -1695,7 +1715,9 @@ function selectedInfoHtml(sp) {
   const spriteUrl = Number.isInteger(selectedId)
     ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedId}.png`
     : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${sp.name}.png`;
-  const dexLabel = Number.isInteger(selectedId) ? `#${String(selectedId).padStart(3,'0')}` : sp.displayName.split('-').slice(1).join('-');
+  const dexLabel = (selectedId < 10000 && Number.isInteger(selectedId))
+    ? `#${String(selectedId).padStart(3,'0')}`
+    : sp.displayName.includes('-') ? sp.displayName.split('-').slice(1).join('-') : '';
   return `
     <div class="selected-info">
       <img src="${spriteUrl}"
@@ -1722,7 +1744,9 @@ function renderPokemonCard(m) {
   const spriteUrl = Number.isInteger(m.id)
     ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${m.id}.png`
     : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${m.name}.png`;
-  const dexLabel = Number.isInteger(m.id) ? `#${String(m.id).padStart(3,'0')}` : m.displayName.split('-').slice(1).join('-');
+  const dexLabel = (m.id < 10000 && Number.isInteger(m.id))
+    ? `#${String(m.id).padStart(3,'0')}`
+    : m.displayName.includes('-') ? m.displayName.split('-').slice(1).join('-') : '';
   return `
     <div class="pokemon-card">
       <img src="${spriteUrl}"
