@@ -1375,6 +1375,26 @@ function genderlessFamily(name) {
   return GENDERLESS_FAMILIES.find(fam => fam.includes(name)) || [name];
 }
 
+// Ultra Beasts — can only breed with themselves; Poipole/Naganadel can also
+// breed with each other since they're an evolution line. No Ditto ever
+// (they're tagged ExtremelyRare, above Ditto's max rarity anyway).
+const ULTRA_BEAST_FAMILIES = [
+  ['nihilego'],
+  ['buzzwole'],
+  ['pheromosa'],
+  ['xurkitree'],
+  ['celesteela'],
+  ['kartana'],
+  ['guzzlord'],
+  ['poipole','naganadel'],
+  ['stakataka'],
+  ['blacephalon'],
+];
+const ULTRA_BEASTS = new Set(ULTRA_BEAST_FAMILIES.flat());
+function ultraBeastFamily(name) {
+  return ULTRA_BEAST_FAMILIES.find(fam => fam.includes(name)) || [name];
+}
+
 // Ditto can only breed with VeryRare or lower (not ExtremelyRare)
 const DITTO_MAX_RARITY = 'VeryRare';
 
@@ -1618,6 +1638,41 @@ async function showResults() {
     return;
   }
 
+  // Ultra Beasts — can only breed with themselves, except Poipole/Naganadel
+  // which can breed within their own evolution line. Never with Ditto.
+  if (ULTRA_BEASTS.has(sp.name)) {
+    const family = ultraBeastFamily(sp.name);
+    const familyMates = pokemonList.filter(p => p.id !== selectedId && family.includes(speciesDB[p.id]?.name));
+    let html = selectedInfoHtml(sp);
+
+    if (familyMates.length === 0) {
+      html += `
+        <div class="no-results" style="background:#2a1a3a;border-color:#7a4ac9;color:#c9a8ff;">
+          <div class="icon">👾</div>
+          <h3>Ultra Beast — Same Species Only</h3>
+          <p><strong>${sp.displayName}</strong> is an Ultra Beast and can only breed with another <strong>${sp.displayName}</strong>. It cannot breed with Ditto.</p>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="type-group-section">
+          <div class="type-group-header">
+            <span class="type-badge" style="background:#7a4ac9;color:#fff;">👾 Ultra Beast</span>
+            Same Evolution Line
+            <span class="type-count">${familyMates.length}</span>
+          </div>
+          <div class="pokemon-grid">
+            ${familyMates.map(m => renderPokemonCard(m)).join('')}
+          </div>
+        </div>
+        <p style="font-size:13px;color:#667;margin:10px 4px;"><strong>${sp.displayName}</strong> is an Ultra Beast and can only breed within its own evolution line. It cannot breed with Ditto.</p>
+      `;
+    }
+
+    resultsEl.innerHTML = html;
+    return;
+  }
+
   // Genderless pokemon — can breed with any Pokémon in their own evolution
   // line (not just the same species/stage); Ditto OK if VeryRare or lower
   if (GENDERLESS.has(sp.name)) {
@@ -1659,7 +1714,7 @@ async function showResults() {
   // We need to batch-load types for all same-rarity pokemon we don't have yet
   const sameRarity = pokemonList.filter(p => {
     const psp = speciesDB[p.id];
-    return p.id !== selectedId && psp && psp.rarity === myRarity && !GENDERLESS.has(psp.name);
+    return p.id !== selectedId && psp && psp.rarity === myRarity && !GENDERLESS.has(psp.name) && !ULTRA_BEASTS.has(psp.name);
   });
 
   // Batch load types for same-rarity pokemon (40 at a time)
