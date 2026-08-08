@@ -1338,35 +1338,42 @@ function getRarity(pokemonName) {
 }
 const RARITY_ORDER = ['Common','Uncommon','Rare','VeryRare','ExtremelyRare','Legendary'];
 
-// Genderless pokemon — breed with same species only; Ditto OK if VeryRare or lower
-const GENDERLESS = new Set([
+// Genderless pokemon — breed with any Pokémon in their own evolution line
+// (not just the exact same species/stage); Ditto OK if VeryRare or lower.
+// Each inner array is one evolution family (or lone species with no line).
+const GENDERLESS_FAMILIES = [
   // Gen 1
-  'magnemite','magneton','magnezone',
-  'voltorb','electrode',
-  'staryu','starmie',
-  'porygon','porygon2','porygon-z',
+  ['magnemite','magneton','magnezone'],
+  ['voltorb','electrode'],
+  ['staryu','starmie'],
+  ['porygon','porygon2','porygon-z'],
   // Gen 2
-  'unown',
-  'lunatone','solrock',
-  'shedinja',
+  ['unown'],
+  ['lunatone'],
+  ['solrock'],
+  ['shedinja'],
   // Gen 3
-  'baltoy','claydol',
-  'beldum','metang','metagross',
-  'bronzor','bronzong',
+  ['baltoy','claydol'],
+  ['beldum','metang','metagross'],
+  ['bronzor','bronzong'],
   // Gen 4
-  'rotom','rotom-heat','rotom-wash','rotom-frost','rotom-fan','rotom-mow',
+  ['rotom','rotom-heat','rotom-wash','rotom-frost','rotom-fan','rotom-mow'],
   // Gen 5
-  'klink','klang','klinklang',
-  'cryogonal',
-  'golett','golurk',
+  ['klink','klang','klinklang'],
+  ['cryogonal'],
+  ['golett','golurk'],
   // Gen 6
-  'carbink',
-  'klefki',
+  ['carbink'],
+  ['klefki'],
   // Gen 7
-  'minior',
-  'dhelmise',
-  'komala',
-]);
+  ['minior'],
+  ['dhelmise'],
+  ['komala'],
+];
+const GENDERLESS = new Set(GENDERLESS_FAMILIES.flat());
+function genderlessFamily(name) {
+  return GENDERLESS_FAMILIES.find(fam => fam.includes(name)) || [name];
+}
 
 // Ditto can only breed with VeryRare or lower (not ExtremelyRare)
 const DITTO_MAX_RARITY = 'VeryRare';
@@ -1597,30 +1604,52 @@ async function showResults() {
   const myRarity = sp.rarity;
   const myTypes  = sp.types; // already loaded
 
-  // Legendary pokemon cannot breed
+  // Legendary pokemon cannot breed with other species — exception: same
+  // legendary species can breed together if BOTH parents are self-caught.
   if (myRarity === 'Legendary') {
     resultsEl.innerHTML = selectedInfoHtml(sp) + `
       <div class="no-results">
         <div class="icon">🚫</div>
-        <h3>Cannot Breed</h3>
-        <p><strong>${sp.displayName}</strong> is a Legendary Pokémon and cannot breed with any Pokémon, including Ditto.</p>
+        <h3>Legendary — Restricted Breeding</h3>
+        <p><strong>${sp.displayName}</strong> cannot breed with any other species, and cannot breed with Ditto.</p>
+        <p style="margin-top:10px;">Exception: two <strong>${sp.displayName}</strong> can breed with each other, but only if <u>both</u> are self-caught (not traded, gifted, or otherwise obtained).</p>
       </div>
     `;
     return;
   }
 
-  // Genderless pokemon — same species only; Ditto OK if VeryRare or lower
+  // Genderless pokemon — can breed with any Pokémon in their own evolution
+  // line (not just the same species/stage); Ditto OK if VeryRare or lower
   if (GENDERLESS.has(sp.name)) {
-    const sameSpecies = pokemonList.filter(p => p.id !== selectedId && p.name === sp.name);
+    const family = genderlessFamily(sp.name);
+    const familyMates = pokemonList.filter(p => p.id !== selectedId && family.includes(speciesDB[p.id]?.name));
     const dittoOk = RARITY_ORDER.indexOf(myRarity) <= RARITY_ORDER.indexOf(DITTO_MAX_RARITY);
     let html = selectedInfoHtml(sp);
-    html += `
-      <div class="no-results" style="background:#f0f4ff;border-color:#99b;color:#445;">
-        <div class="icon">⚧</div>
-        <h3>Genderless — Same Species Only</h3>
-        <p><strong>${sp.displayName}</strong> is genderless and can only breed with another <strong>${sp.displayName}</strong>${dittoOk ? ' or with Ditto' : ''}.${dittoOk ? '' : '<br/>Ditto cannot breed with this Pokémon.'}</p>
-      </div>
-    `;
+
+    if (familyMates.length === 0) {
+      html += `
+        <div class="no-results" style="background:#f0f4ff;border-color:#99b;color:#445;">
+          <div class="icon">⚧</div>
+          <h3>Genderless — Evolution Line Only</h3>
+          <p><strong>${sp.displayName}</strong> is genderless and can only breed with other Pokémon in its own evolution line${dittoOk ? ', or with Ditto' : ''}. No other stage of its line is in the current list.${dittoOk ? '' : '<br/>Ditto cannot breed with this Pokémon.'}</p>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="type-group-section">
+          <div class="type-group-header">
+            <span class="type-badge" style="background:#667;color:#fff;">⚧ Genderless</span>
+            Same Evolution Line
+            <span class="type-count">${familyMates.length}</span>
+          </div>
+          <div class="pokemon-grid">
+            ${familyMates.map(m => renderPokemonCard(m)).join('')}
+          </div>
+        </div>
+        <p style="font-size:13px;color:#667;margin:10px 4px;"><strong>${sp.displayName}</strong> is genderless and can only breed with other Pokémon in its own evolution line${dittoOk ? ', or with Ditto' : ''}.${dittoOk ? '' : '<br/>Ditto cannot breed with this Pokémon.'}</p>
+      `;
+    }
+
     if (dittoOk) html += dittoSectionHtml(sp);
     resultsEl.innerHTML = html;
     return;
