@@ -1012,7 +1012,7 @@ const RARITY_DATA = {
   'phanpy': 'VeryRare',
   'phantump': 'Rare',
   'pheromosa': 'ExtremelyRare',
-  'phione': 'Legendary',
+  'phione': 'ExtremelyRare',
   'pichu': 'VeryRare',
   'pidgeot': 'Common',
   'pidgeotto': 'Common',
@@ -1358,6 +1358,7 @@ const GENDERLESS_FAMILIES = [
   ['bronzor','bronzong'],
   // Gen 4
   ['rotom','rotom-heat','rotom-wash','rotom-frost','rotom-fan','rotom-mow'],
+  ['phione'],
   // Gen 5
   ['klink','klang','klinklang'],
   ['cryogonal'],
@@ -1369,6 +1370,7 @@ const GENDERLESS_FAMILIES = [
   ['minior'],
   ['dhelmise'],
   ['komala'],
+  ['type-null','silvally'],
 ];
 const GENDERLESS = new Set(GENDERLESS_FAMILIES.flat());
 function genderlessFamily(name) {
