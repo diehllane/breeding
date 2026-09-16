@@ -1371,16 +1371,14 @@ const GENDERLESS_FAMILIES = [
   ['dhelmise'],
   ['komala'],
   ['type-null','silvally'],
-];
-const GENDERLESS = new Set(GENDERLESS_FAMILIES.flat());
-function genderlessFamily(name) {
-  return GENDERLESS_FAMILIES.find(fam => fam.includes(name)) || [name];
-}
-
-// Ultra Beasts — can only breed with themselves; Poipole/Naganadel can also
-// breed with each other since they're an evolution line. No Ditto ever
-// (they're tagged ExtremelyRare, above Ditto's max rarity anyway).
-const ULTRA_BEAST_FAMILIES = [
+  // Ultra Beasts (Gen 7) — genderless like everything else in this set.
+  // Poipole/Naganadel are the one evolution line among them; the rest are
+  // each their own single-species family. Being genderless, they follow the
+  // normal genderless rules: breed with any same-rarity/same-type Pokémon
+  // (egg is always the Ultra Beast's species), can't breed with other
+  // genderless Pokémon (Ultra Beasts included) outside their own family,
+  // and never breed with Ditto (they're ExtremelyRare, above Ditto's max
+  // rarity anyway).
   ['nihilego'],
   ['buzzwole'],
   ['pheromosa'],
@@ -1392,9 +1390,9 @@ const ULTRA_BEAST_FAMILIES = [
   ['stakataka'],
   ['blacephalon'],
 ];
-const ULTRA_BEASTS = new Set(ULTRA_BEAST_FAMILIES.flat());
-function ultraBeastFamily(name) {
-  return ULTRA_BEAST_FAMILIES.find(fam => fam.includes(name)) || [name];
+const GENDERLESS = new Set(GENDERLESS_FAMILIES.flat());
+function genderlessFamily(name) {
+  return GENDERLESS_FAMILIES.find(fam => fam.includes(name)) || [name];
 }
 
 // Ditto can only breed with VeryRare or lower (not ExtremelyRare)
@@ -1602,8 +1600,8 @@ function dittoSectionHtml(sp) {
       <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png" alt="Ditto" />
       <div>
         <h4>🔮 Ditto — Always Compatible</h4>
-        <p>Ditto ignores type and rarity rules and can breed with <strong>${sp.displayName}</strong> regardless.<br/>
-        The egg produced will always be a <strong>${sp.displayName}</strong> (female parent determines the egg species).</p>
+        <p>Ditto ignores type matching and doesn't need to share rarity — it can breed with <strong>${sp.displayName}</strong> (Very Rare or lower) regardless.<br/>
+        The egg produced will always be a <strong>${sp.displayName}</strong> (Ditto never determines the egg's species).</p>
       </div>
     </div>
   `;
@@ -1634,89 +1632,104 @@ async function showResults() {
         <div class="icon">🚫</div>
         <h3>Legendary — Restricted Breeding</h3>
         <p><strong>${sp.displayName}</strong> cannot breed with any other species, and cannot breed with Ditto.</p>
-        <p style="margin-top:10px;">Exception: two <strong>${sp.displayName}</strong> can breed with each other, but only if <u>both</u> are self-caught (not traded, gifted, or otherwise obtained).</p>
+        <p style="margin-top:10px;">Exception: two <strong>${sp.displayName}</strong> can breed with each other if <u>both</u> are self-caught (not traded, gifted, or otherwise obtained) — regardless of gender. Some legendaries are locked to a single gender (e.g. Latios is always male, Latias is always female), so this is what allows two self-caught Latios, two self-caught Latias, or any other same-species pairing to breed together. Different forms of the same legendary (e.g. Giratina-Origin, Kyurem-Black) still count as the same species for this — the child simply takes the mother's form.</p>
       </div>
     `;
     return;
   }
 
-  // Ultra Beasts — can only breed with themselves, except Poipole/Naganadel
-  // which can breed within their own evolution line. Never with Ditto.
-  if (ULTRA_BEASTS.has(sp.name)) {
-    const family = ultraBeastFamily(sp.name);
-    const familyMates = pokemonList.filter(p => p.id !== selectedId && family.includes(speciesDB[p.id]?.name));
-    let html = selectedInfoHtml(sp);
+  // Ditto — ignores type matching entirely, and doesn't need to match its
+  // partner's rarity, but can only breed with Common/Uncommon/Rare/VeryRare
+  // Pokémon (never ExtremelyRare or Legendary). Two Ditto cannot breed
+  // together. The egg is always the OTHER parent's species/form.
+  if (sp.name === 'ditto') {
+    const maxIdx = RARITY_ORDER.indexOf(DITTO_MAX_RARITY);
+    const dittoMates = pokemonList.filter(p => {
+      const psp = speciesDB[p.id];
+      return p.id !== selectedId && psp && psp.name !== 'ditto' && RARITY_ORDER.indexOf(psp.rarity) <= maxIdx;
+    });
+    const byRarity = {};
+    for (const p of dittoMates) {
+      const r = speciesDB[p.id].rarity;
+      (byRarity[r] = byRarity[r] || []).push(p);
+    }
+    for (const r of Object.keys(byRarity)) byRarity[r].sort((a,b) => a.id - b.id);
 
-    if (familyMates.length === 0) {
-      html += `
-        <div class="no-results" style="background:#2a1a3a;border-color:#7a4ac9;color:#c9a8ff;">
-          <div class="icon">👾</div>
-          <h3>Ultra Beast — Same Species Only</h3>
-          <p><strong>${sp.displayName}</strong> is an Ultra Beast and can only breed with another <strong>${sp.displayName}</strong>. It cannot breed with Ditto.</p>
-        </div>
-      `;
-    } else {
+    let html = selectedInfoHtml(sp) + `
+      <div class="no-results" style="background:#fff0f6;border-color:#d9799a;color:#7a3350;">
+        <div class="icon">🔮</div>
+        <h3>Ditto — Universal Breeding</h3>
+        <p><strong>Ditto</strong> ignores type matching and doesn't need to share rarity with its partner — it can breed with any <strong>Common, Uncommon, Rare, or Very Rare</strong> Pokémon. It cannot breed with Extremely Rare or Legendary Pokémon, and two Ditto cannot breed together.</p>
+        <p style="margin-top:8px;">The egg is always the <em>other</em> parent's species and form — Ditto never determines the egg's identity.</p>
+      </div>
+    `;
+    for (const r of RARITY_ORDER.filter(r => byRarity[r] && byRarity[r].length)) {
       html += `
         <div class="type-group-section">
           <div class="type-group-header">
-            <span class="type-badge" style="background:#7a4ac9;color:#fff;">👾 Ultra Beast</span>
-            Same Evolution Line
-            <span class="type-count">${familyMates.length}</span>
+            <span class="rarity-tag rarity-${r}">${RARITY_LABEL[r]}</span>
+            Compatible Pokémon
+            <span class="type-count">${byRarity[r].length}</span>
           </div>
           <div class="pokemon-grid">
-            ${familyMates.map(m => renderPokemonCard(m)).join('')}
+            ${byRarity[r].map(m => renderPokemonCard(m)).join('')}
           </div>
         </div>
-        <p style="font-size:13px;color:#667;margin:10px 4px;"><strong>${sp.displayName}</strong> is an Ultra Beast and can only breed within its own evolution line. It cannot breed with Ditto.</p>
       `;
     }
-
     resultsEl.innerHTML = html;
     return;
   }
 
-  // Genderless pokemon — can breed with any Pokémon in their own evolution
-  // line (not just the same species/stage); Ditto OK if VeryRare or lower
-  if (GENDERLESS.has(sp.name)) {
-    const family = genderlessFamily(sp.name);
-    const familyMates = pokemonList.filter(p => p.id !== selectedId && family.includes(speciesDB[p.id]?.name));
-    const dittoOk = RARITY_ORDER.indexOf(myRarity) <= RARITY_ORDER.indexOf(DITTO_MAX_RARITY);
-    let html = selectedInfoHtml(sp);
+  // Genderless pokemon — can breed with any male or female Pokémon sharing
+  // rarity + a type (egg is always the genderless parent's species), and
+  // can also breed with genderless Pokémon within their own evolution line.
+  // They cannot breed with genderless Pokémon outside that line.
+  const isGenderless = GENDERLESS.has(sp.name);
+  let html = selectedInfoHtml(sp);
+  let genderlessFamilyMates = [];
 
-    if (familyMates.length === 0) {
-      html += `
-        <div class="no-results" style="background:#f0f4ff;border-color:#99b;color:#445;">
-          <div class="icon">⚧</div>
-          <h3>Genderless — Evolution Line Only</h3>
-          <p><strong>${sp.displayName}</strong> is genderless and can only breed with other Pokémon in its own evolution line${dittoOk ? ', or with Ditto' : ''}. No other stage of its line is in the current list.${dittoOk ? '' : '<br/>Ditto cannot breed with this Pokémon.'}</p>
-        </div>
-      `;
-    } else {
+  if (isGenderless) {
+    html += `
+      <div class="no-results" style="background:#f0f4ff;border-color:#99b;color:#445;">
+        <div class="icon">⚧</div>
+        <h3>Genderless Breeding Rules</h3>
+        <p><strong>${sp.displayName}</strong> is genderless. It can breed with any male or female Pokémon that shares its rarity and a type (shown below) — the egg will always be a <strong>${sp.displayName}</strong>, since a genderless parent is always treated as the mother.</p>
+        <p style="margin-top:8px;">It can also breed with other genderless Pokémon, but only within its own evolution line (shown below if any). It cannot breed with genderless Pokémon outside that line.</p>
+      </div>
+    `;
+
+    const family = genderlessFamily(sp.name);
+    genderlessFamilyMates = pokemonList.filter(p => p.id !== selectedId && family.includes(speciesDB[p.id]?.name));
+    if (genderlessFamilyMates.length) {
       html += `
         <div class="type-group-section">
           <div class="type-group-header">
             <span class="type-badge" style="background:#667;color:#fff;">⚧ Genderless</span>
             Same Evolution Line
-            <span class="type-count">${familyMates.length}</span>
+            <span class="type-count">${genderlessFamilyMates.length}</span>
           </div>
           <div class="pokemon-grid">
-            ${familyMates.map(m => renderPokemonCard(m)).join('')}
+            ${genderlessFamilyMates.map(m => renderPokemonCard(m)).join('')}
           </div>
         </div>
-        <p style="font-size:13px;color:#667;margin:10px 4px;"><strong>${sp.displayName}</strong> is genderless and can only breed with other Pokémon in its own evolution line${dittoOk ? ', or with Ditto' : ''}.${dittoOk ? '' : '<br/>Ditto cannot breed with this Pokémon.'}</p>
       `;
     }
-
-    if (dittoOk) html += dittoSectionHtml(sp);
-    resultsEl.innerHTML = html;
-    return;
   }
 
-  // Find all pokemon sharing same rarity AND at least one type
+  // Find all pokemon sharing same rarity AND at least one type.
+  // Genderless-selected: exclude every OTHER genderless species (its own
+  // family is handled separately above; other genderless species can't
+  // pair with it per the rule above).
+  // Non-genderless-selected: genderless candidates ARE included here since
+  // they can breed with any same-rarity/type Pokémon — marked with * below.
   // We need to batch-load types for all same-rarity pokemon we don't have yet
   const sameRarity = pokemonList.filter(p => {
     const psp = speciesDB[p.id];
-    return p.id !== selectedId && psp && psp.rarity === myRarity && !GENDERLESS.has(psp.name) && !ULTRA_BEASTS.has(psp.name);
+    if (!psp || p.id === selectedId || psp.rarity !== myRarity) return false;
+    if (psp.name === 'ditto') return false;
+    if (isGenderless && GENDERLESS.has(psp.name)) return false;
+    return true;
   });
 
   // Batch load types for same-rarity pokemon (40 at a time)
@@ -1757,8 +1770,7 @@ async function showResults() {
   // Sort type keys by the selected pokemon's type order (primary type first)
   const sortedTypes = myTypes.filter(t => typeGroups[t] && typeGroups[t].length > 0);
 
-  // Render
-  let html = selectedInfoHtml(sp);
+  let anyGenderlessInResults = false;
 
   if (sortedTypes.length === 0) {
     html += `
@@ -1766,7 +1778,7 @@ async function showResults() {
         <div class="icon">🔍</div>
         <h3>No compatible Pokémon found</h3>
         <p>No other <strong>${RARITY_LABEL[myRarity]}</strong> Pokémon share a type with <strong>${sp.displayName}</strong>.<br/>
-        Ditto can still breed with any Pokémon regardless of type or rarity.</p>
+        Ditto can still breed with it if it's Very Rare or lower rarity.</p>
       </div>
     `;
   } else {
@@ -1780,11 +1792,23 @@ async function showResults() {
             <span class="type-count">${members.length}</span>
           </div>
           <div class="pokemon-grid">
-            ${members.map(m => renderPokemonCard(m)).join('')}
+            ${members.map(m => {
+              const markGenderless = !isGenderless && GENDERLESS.has(m.name);
+              if (markGenderless) anyGenderlessInResults = true;
+              return renderPokemonCard(m, { markGenderless });
+            }).join('')}
           </div>
         </div>
       `;
     }
+  }
+
+  if (anyGenderlessInResults) {
+    html += `
+      <p style="font-size:12px;color:#667;margin:10px 4px;">
+        * Genderless Pokémon always determine the egg's species — breeding with a marked Pokémon above will produce <em>that</em> Pokémon, not <strong>${sp.displayName}</strong>.
+      </p>
+    `;
   }
 
   // Ditto at bottom — only for VeryRare or lower
@@ -1821,7 +1845,7 @@ function selectedInfoHtml(sp) {
   `;
 }
 
-function renderPokemonCard(m) {
+function renderPokemonCard(m, opts = {}) {
   const sp = speciesDB[m.id];
   const types = sp?.types || [];
   const rarity = sp?.rarity || 'Common';
@@ -1833,12 +1857,15 @@ function renderPokemonCard(m) {
   const dexLabel = (m.id < 10000 && Number.isInteger(m.id))
     ? `#${String(m.id).padStart(3,'0')}`
     : m.displayName.includes('-') ? m.displayName.split('-').slice(1).join('-') : '';
+  const genderlessMark = opts.markGenderless
+    ? ' <span title="Genderless — the egg will always be this species" style="color:#7a4ac9;font-weight:700;">*</span>'
+    : '';
   return `
     <div class="pokemon-card">
       <img src="${spriteUrl}"
            alt="${m.displayName}" loading="lazy"
            onerror="this.src=''" />
-      <span class="pname">${m.displayName}</span>
+      <span class="pname">${m.displayName}${genderlessMark}</span>
       <span class="pdex">${dexLabel}</span>
       ${typeHtml ? `<div class="ptypes">${typeHtml}</div>` : ''}
       <span class="prarity ${`rarity-${rarity}`}">${RARITY_LABEL[rarity]}</span>
