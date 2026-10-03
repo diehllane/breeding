@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PokeNexus IV Breeding Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue:        #2855ae;
+      --blue-dark:   #1a3a7a;
+      --blue-light:  #5b80d4;
+      --yellow:      #f7c948;
+      --yellow-dark: #d4a016;
+      --red:         #cc2222;
+      --green:       #3a9c46;
+      --green-dark:  #227030;
+      --offwhite:    #eef1f9;
+      --gray:        #6b7280;
+      --text:        #1a1a2e;
+      --shadow:      rgba(40,85,174,0.18);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--blue-dark);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 60% 10%, rgba(204,34,34,0.25) 0%, transparent 55%),
+        radial-gradient(circle at 10% 80%, rgba(88,128,212,0.25) 0%, transparent 55%),
+        linear-gradient(160deg, #1a3a7a 0%, #0d1f4a 60%, #0a1530 100%);
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      border: 60px solid rgba(255,255,255,0.03);
+      top: -150px; right: -150px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 32px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .disclaimer-banner {
+      position: relative;
+      z-index: 10;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 10px 18px;
+      background: rgba(247,201,72,0.14);
+      border: 1px solid var(--yellow-dark);
+      border-radius: 10px;
+      text-align: center;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--yellow);
+      line-height: 1.5;
+    }
+    .logo-text {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(14px, 3.5vw, 28px);
+      color: var(--yellow);
+      text-shadow: 3px 3px 0 var(--yellow-dark), 5px 5px 0 rgba(0,0,0,0.3), 0 0 40px rgba(247,201,72,0.5);
+      letter-spacing: 2px;
+      animation: logoFloat 3s ease-in-out infinite;
+    }
+    @keyframes logoFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+    header h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(7px, 1.8vw, 11px);
+      color: var(--yellow);
+      text-shadow: 2px 2px 0 var(--yellow-dark);
+      letter-spacing: 1px;
+      line-height: 1.7;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .back-link {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--yellow);
+      text-decoration: none;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+    .back-link:hover { opacity: 1; text-decoration: underline; }
+
+    main {
+      position: relative;
+      z-index: 10;
+      max-width: 860px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px var(--shadow), 0 2px 0 var(--yellow) inset;
+      padding: 28px;
+      border: 2px solid rgba(255,255,255,0.9);
+    }
+
+    .intro-text {
+      font-size: 13px;
+      color: var(--gray);
+      font-weight: 600;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 2px dashed #d0d8ee;
+      margin: 24px 0;
+    }
+
+    /* ── PARENT FORM ── */
+    .parents-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 640px) {
+      .parents-grid { grid-template-columns: 1fr; }
+    }
+    .parent-panel {
+      background: var(--offwhite);
+      border: 2px solid #d8e0f0;
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .parent-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: var(--blue-dark);
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .stat-row label.stat-name {
+      flex: 1 1 auto;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .stat-row input[type="number"] {
+      width: 64px;
+      padding: 8px 6px;
+      font-size: 14px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      text-align: center;
+      border: 2px solid var(--blue-light);
+      border-radius: 8px;
+      outline: none;
+      color: var(--text);
+      background: #ffffff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .stat-row input[type="number"]:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(40,85,174,0.15);
+    }
+    .stat-row input[type="number"].invalid {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(204,34,34,0.15);
+    }
+    .lock-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--blue-dark);
+      flex: 0 0 auto;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .lock-wrap input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .check-btn-wrap {
+      text-align: center;
+      margin-top: 24px;
+    }
+    #check-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: #1a1a2e;
+      background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
+      border: none;
+      border-radius: 12px;
+      padding: 14px 32px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(212,160,22,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    #check-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(212,160,22,0.5);
+    }
+    #check-btn:active { transform: translateY(0); }
+
+    .form-error {
+      text-align: center;
+      color: var(--red);
+      font-weight: 700;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+    .form-error.visible { display: block; }
+
+    /* ── RESULTS ── */
+    #results { display: none; margin-top: 8px; }
+    #results.visible { display: block; }
+
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      background: var(--offwhite);
+      border: 2px solid #d8e0f0;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .result-row.invalid-row {
+      background: #fdeaea;
+      border-color: var(--red);
+    }
+    .result-stat-name {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: var(--blue-dark);
+      flex: 0 0 150px;
+    }
+    .result-locked-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--blue-dark);
+      background: rgba(40,85,174,0.1);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .result-invalid-badge {
+      font-weight: 800;
+      font-size: 13px;
+      color: #8a0000;
+    }
+    .result-range {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--gray);
+      flex: 0 0 auto;
+    }
+    .result-percentages {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 13px;
+      margin-left: auto;
+    }
+    .pct-pill {
+      padding: 3px 10px;
+      border-radius: 20px;
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 800;
+    }
+    .pct-red    { background: var(--red); }
+    .pct-yellow { background: var(--yellow-dark); color: #2a1e00; }
+    .pct-green  { background: var(--green-dark); }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 18px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--gray);
+      flex-wrap: wrap;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow-dark); }
+    .dot-green  { background: var(--green-dark); }
+
+    footer {
+      position: relative; z-index: 10;
+      text-align: center; padding: 20px;
+      color: rgba(255,255,255,0.4);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-text">PokeNexus</div>
+    <h1>IV Breeding Calculator</h1>
+    <span class="subtitle">Companion Tool · Stat Inheritance</span>
+    <a class="back-link" href="index.html">&larr; Back to Breeding Compatibility Chart</a>
+  </header>
+
+  <div class="disclaimer-banner">
+    This page estimates possible child IVs from two parents' IVs — it does not look up species, breeding eligibility, or egg groups.
+  </div>
+
+  <main>
+    <div class="card">
+
+      <p class="intro-text">
+        Enter each parent's 6 IV stats (0–31). Optionally lock one stat per parent (from an IV Powder) to guarantee it passes to the child exactly as-is. Any unlocked stat is randomized between the two parents' values — the ranges and odds below are calculated from that range.
+      </p>
+
+      <div class="parents-grid">
+        <div class="parent-panel" id="panel-p1">
+          <div class="parent-title">Parent 1</div>
+          <div class="stat-rows" data-parent="0"></div>
+        </div>
+        <div class="parent-panel" id="panel-p2">
+          <div class="parent-title">Parent 2</div>
+          <div class="stat-rows" data-parent="1"></div>
+        </div>
+      </div>
+
+      <div class="check-btn-wrap">
+        <button id="check-btn" type="button">Check Stats</button>
+        <div class="form-error" id="form-error">Please enter a whole number from 0–31 for every stat.</div>
+      </div>
+
+      <hr class="divider" id="results-divider" style="display:none;" />
+      <div id="results"></div>
+
+      <div class="legend" id="legend" style="display:none;">
+        <span><span class="dot dot-red"></span> 0–10</span>
+        <span><span class="dot dot-yellow"></span> 11–20</span>
+        <span><span class="dot dot-green"></span> 21–31</span>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    PokeNexus fan tool · IV Breeding Calculator
+  </footer>
+
+<script>
+  const STATS = ['HP', 'Attack', 'Defense', 'Special Attack', 'Special Defense', 'Speed'];
+
+  function buildStatRows() {
+    document.querySelectorAll('.stat-rows').forEach(container => {
+      const parentIdx = container.dataset.parent;
+      let html = '';
+      STATS.forEach((stat, i) => {
+        html += `
+          <div class="stat-row">
+            <label class="stat-name" for="iv-${parentIdx}-${i}">${stat}</label>
+            <input type="number" id="iv-${parentIdx}-${i}" class="iv-input" data-parent="${parentIdx}" data-stat="${i}" min="0" max="31" step="1" placeholder="0-31" />
+            <label class="lock-wrap" for="lock-${parentIdx}-${i}">
+              <input type="checkbox" id="lock-${parentIdx}-${i}" class="lock-checkbox" data-parent="${parentIdx}" data-stat="${i}" />
+              Lock
+            </label>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    });
+
+    // Enforce only one lock checked per parent at a time.
+    document.querySelectorAll('.lock-checkbox').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (cb.checked) {
+          document.querySelectorAll(`.lock-checkbox[data-parent="${cb.dataset.parent}"]`).forEach(other => {
+            if (other !== cb) other.checked = false;
+          });
+        }
+      });
+    });
+  }
+
+  function getLockedStat(parentIdx) {
+    const checked = document.querySelector(`.lock-checkbox[data-parent="${parentIdx}"]:checked`);
+    return checked ? parseInt(checked.dataset.stat, 10) : -1;
+  }
+
+  function readIVs(parentIdx) {
+    const vals = [];
+    for (let i = 0; i < 6; i++) {
+      const input = document.getElementById(`iv-${parentIdx}-${i}`);
+      vals.push(input.value.trim() === '' ? NaN : Number(input.value));
+    }
+    return vals;
+  }
+
+  function validateAll() {
+    let allValid = true;
+    document.querySelectorAll('.iv-input').forEach(input => {
+      const v = input.value.trim();
+      const n = Number(v);
+      const valid = v !== '' && Number.isInteger(n) && n >= 0 && n <= 31;
+      input.classList.toggle('invalid', !valid);
+      if (!valid) allValid = false;
+    });
+    return allValid;
+  }
+
+  // Largest-remainder rounding: takes an array of raw (possibly fractional)
+  // percentages and returns integers that sum to exactly 100.
+  function roundToHundred(raws) {
+    const floors = raws.map(Math.floor);
+    let remainder = 100 - floors.reduce((a, b) => a + b, 0);
+    const order = raws
+      .map((r, i) => ({ i, frac: r - Math.floor(r) }))
+      .sort((a, b) => b.frac - a.frac);
+    const result = floors.slice();
+    for (let k = 0; k < remainder && k < order.length; k++) {
+      result[order[k].i] += 1;
+    }
+    return result;
+  }
+
+  function bucketPercentages(lo, hi) {
+    const buckets = [[0, 10], [11, 20], [21, 31]];
+    const total = hi - lo + 1;
+    const counts = buckets.map(([a, b]) => Math.max(0, Math.min(hi, b) - Math.max(lo, a) + 1));
+    const raws = counts.map(c => (c / total) * 100);
+    return roundToHundred(raws);
+  }
+
+  function renderResults() {
+    const p1Vals = readIVs(0);
+    const p2Vals = readIVs(1);
+    const p1Lock = getLockedStat(0);
+    const p2Lock = getLockedStat(1);
+
+    const resultsEl = document.getElementById('results');
+    let html = '';
+
+    for (let i = 0; i < 6; i++) {
+      const lockedByP1 = p1Lock === i;
+      const lockedByP2 = p2Lock === i;
+      const v1 = p1Vals[i];
+      const v2 = p2Vals[i];
+
+      if (lockedByP1 && lockedByP2) {
+        if (v1 === v2) {
+          html += resultRowLocked(STATS[i], v1);
+        } else {
+          html += resultRowInvalid(STATS[i], v1, v2);
+        }
+      } else if (lockedByP1) {
+        html += resultRowLocked(STATS[i], v1);
+      } else if (lockedByP2) {
+        html += resultRowLocked(STATS[i], v2);
+      } else {
+        const lo = Math.min(v1, v2);
+        const hi = Math.max(v1, v2);
+        const [red, yellow, green] = bucketPercentages(lo, hi);
+        html += resultRowRange(STATS[i], lo, hi, red, yellow, green);
+      }
+    }
+
+    resultsEl.innerHTML = html;
+    resultsEl.classList.add('visible');
+    document.getElementById('results-divider').style.display = 'block';
+    document.getElementById('legend').style.display = 'flex';
+  }
+
+  function resultRowLocked(statName, value) {
+    return `
+      <div class="result-row">
+        <span class="result-stat-name">${statName}</span>
+        <span class="result-locked-badge">🔒 Locked: ${value}</span>
+      </div>
+    `;
+  }
+
+  function resultRowInvalid(statName, v1, v2) {
+    return `
+      <div class="result-row invalid-row">
+        <span class="result-stat-name">${statName}</span>
+        <span class="result-invalid-badge">⚠ Invalid: both parents lock this stat to different values (${v1} vs ${v2}). Only one parent can lock a given stat.</span>
+      </div>
+    `;
+  }
+
+  function resultRowRange(statName, lo, hi, red, yellow, green) {
+    const rangeText = lo === hi ? `Fixed at ${lo}` : `Range: ${lo}–${hi}`;
+    return `
+      <div class="result-row">
+        <span class="result-stat-name">${statName}</span>
+        <span class="result-range">${rangeText}</span>
+        <span class="result-percentages">
+          <span class="pct-pill pct-red">${red}%</span>
+          <span class="pct-pill pct-yellow">${yellow}%</span>
+          <span class="pct-pill pct-green">${green}%</span>
+        </span>
+      </div>
+    `;
+  }
+
+  document.getElementById('check-btn').addEventListener('click', () => {
+    const errorEl = document.getElementById('form-error');
+    if (!validateAll()) {
+      errorEl.classList.add('visible');
+      return;
+    }
+    errorEl.classList.remove('visible');
+    renderResults();
+  });
+
+  buildStatRows();
+</script>
+
+</body>
+</html>
